@@ -19,6 +19,7 @@
     "next": "^11.1.4",
     "next-navigation": "^1.0.6",
     "postcss": "^8.4.6",
+    "primereact": "^10.9.7",
     "react": "^17.0.2",
     "react_vertical_horizontal_tabs": "^1.0.3",
     "react-audio-play": "^1.0.4",
