@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import  Header  from '../components/Header';
 import axios from 'axios'
 import Link from 'next/link';
+import { FaRegComments } from 'react-icons/fa6';
 import { MdFavorite, MdModeComment } from 'react-icons/md';
 import { AudioPlayer } from 'react-audio-play';
 import { Audio } from 'react-loader-spinner'
@@ -13,11 +14,12 @@ import { MdAdd } from 'react-icons/md';
 import { MdArrowDownward } from 'react-icons/md';
 import { MdArrowUpward } from 'react-icons/md';
 import { Tooltip } from 'react-tooltip'
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 
 export default function Home() {
   const router = useRouter();
   // Check Auth Status
+
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('rmt_token');

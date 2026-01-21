@@ -1,24 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { IoMdArrowRoundBack } from 'react-icons/io';
 import axios from 'axios';
 import { Audio } from 'react-loader-spinner';
-import { RiFolderMusicLine } from 'react-icons/ri';
-import { LiaGuitarSolid } from 'react-icons/lia';
-import { TbInfoSquareRounded } from 'react-icons/tb';
-import { AudioPlayer } from 'react-audio-play';
-import { RiFlowChart } from 'react-icons/ri';
 import moment from 'moment';
-import ReactStars from 'react-rating-stars-component/dist/react-stars';
-import { MdFavorite, MdModeComment, MdStarRate } from 'react-icons/md';
-import { SlideDown } from 'react-slidedown';
-import { IoSend } from 'react-icons/io5';
 import Header from '@/components/Header';
-
+import { MultiSelect } from 'primereact/multiselect';
+import { InputTextarea } from 'primereact/inputtextarea';
 
 
 function Dashboard() {
+
   const router = useRouter();
   const params = router.query;
 
@@ -51,6 +43,42 @@ function Dashboard() {
     };
     fetchCurrentcurrentUserData();
   }, []);
+
+  // Profile Settings
+  const [userUsername, setUserUsername] = useState(currentUserData.user_username);
+  const [inputUserCity, setInputUserCity] = useState(currentUserData.user_city);
+  const [inputUserState, setInputUserState] = useState(currentUserData.user_state);
+  const [inputUserCountry, setInputUserCountry] = useState(currentUserData.user_country);
+  const [inputUserBio, setInputUserBio] = useState(currentUserData.user_bio);
+  const [inputUserAge, setInputUserAge] = useState(currentUserData.user_age);
+  const [selectedGenres, setSelectedGenres] = useState(currentUserData.user_fav_genres);
+  const [inputUserYoutube, setInputUserYoutube] = useState(currentUserData.user_youtube);
+  const [inputUserInsta, setInputUserInsta] = useState(currentUserData.user_insta);
+  const [inputUserSoundcloud, setInputUserSoundcloud] = useState(currentUserData.user_soundcloud);
+  const [inputUserSpotify, setInputUserSpotify] = useState(currentUserData.user_spotify);
+
+
+  const genreList = [
+    { label: 'Acoustic', value: 'Acoustic' },
+    { label: 'Bluegrass', value: 'Bluegrass' },
+    { label: 'Blues', value: 'Blues' },
+    { label: 'Country', value: 'Country' },
+    { label: 'Electronic', value: 'Electronic' },
+    { label: 'Experimental', value: 'Experimental' },
+    { label: 'Funk', value: 'Funk' },
+    { label: 'Hip Hop', value: 'Hip Hop' },
+    { label: 'Jazz', value: 'Jazz' },
+    { label: 'Latin', value: 'Latin' },
+    { label: 'Metal', value: 'Metal' },
+    { label: 'Other', value: 'Other' },
+    { label: 'Pop', value: 'Pop' },
+    { label: 'Psychedelic', value: 'Psychedelic' },
+    { label: 'R&B / Soul', value: 'R&B / Soul' },
+    { label: 'Reggae', value: 'Reggae' },
+    { label: 'Rock', value: 'Rock' },
+    { label: 'World', value: 'World' }
+  ];
+
 
 
 
@@ -144,11 +172,11 @@ function Dashboard() {
             {settingsVisible && (
               <div className='music_list_item p-[20px] flex flex-col gap-5'>
                 <h2 className='text-white text-[22px]'>Profile Settings</h2>
-                <div className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'>
+                <div className='music_list_item px-[20px] pt-[20px] pb-[30px] flex flex-col gap-5 rounded-3xl mb-[10px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'>
                   <div className=''>
                     <h3 className='text-white text-[18px]'>Basic Info</h3>
-                    <hr />
-                    <form className='mt-5 flex flex-col gap-5'>
+                    <hr className='border-[#494949] mt-2' />
+                    <form className='mt-4 flex flex-col gap-5'>
                       <div className='flex gap-[20px]'>
                         <div className='w-full'>
                           <label
@@ -159,13 +187,12 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={currentUserData.slug}
-                            value=''
-                            onChange=''
-                            className='rounded-full w-full'
+                            placeholder={userUsername}
+                            value={userUsername}
+                            onChange={(e) => setUserUsername(e.target.value)}
+                            className='rounded-xl w-full'
                           />
                         </div>
-
                         <div className='w-full'>
                           <label
                             className='text-white p-1 mb-1 block'
@@ -175,10 +202,10 @@ function Dashboard() {
                           </label>
                           <input
                             type='number'
-                            placeholder=''
-                            value=''
-                            onChange=''
-                            className='rounded-full w-full'
+                            placeholder={inputUserAge}
+                            value={inputUserAge}
+                            onChange={(e) => setInputUserAge(e.target.value)}
+                            className='rounded-xl w-full'
                           />
                         </div>
                       </div>
@@ -192,10 +219,10 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder=''
-                            value=''
-                            onChange=''
-                            className='rounded-full w-full'
+                            placeholder={inputUserCity}
+                            value={inputUserCity}
+                            onChange={(e) => setInputUserCity(e.target.value)}
+                            className='rounded-xl w-full'
                           />
                         </div>
                         <div className='w-full'>
@@ -207,10 +234,10 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder=''
-                            value=''
-                            onChange=''
-                            className='rounded-full w-full'
+                            placeholder={inputUserState}
+                            value={inputUserState}
+                            onChange={(e) => setInputUserState(e.target.value)}
+                            className='rounded-xl w-full'
                           />
                         </div>
                         <div className='w-full'>
@@ -222,12 +249,144 @@ function Dashboard() {
                           </label>
                           <input
                             type='number'
-                            placeholder=''
-                            value=''
-                            onChange=''
-                            className='rounded-full w-full'
+                            placeholder={inputUserCountry}
+                            value={inputUserCountry}
+                            onChange={(e) => setInputUserCountry(e.target.value)}
+                            className='rounded-xl w-full'
                           />
                         </div>
+                      </div>
+                      <div className='flex justify-end gap-[20px]'>
+                        <button className='px-4 py-[5px] mt-2 text-white bg-[#53A870] rounded-full font-normal'>
+                          Save Changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <div className='music_list_item px-[20px]  pt-[20px] pb-[30px] flex flex-col gap-5 rounded-3xl mb-[20px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'>
+                  <div className=''>
+                    <h3 className='text-white text-[18px]'>About Me</h3>
+                    <hr className='border-[#494949] mt-2' />
+                    <form className='mt-4 flex flex-col gap-5'>
+                      <div className='flex gap-[20px]'>
+                        <div className='w-full'>
+                          <label
+                            className='text-white p-1 mb-1 block'
+                            htmlFor='genres'
+                          >
+                            Favorite Genres
+                          </label>
+                          <MultiSelect
+                            value={selectedGenres}
+                            onChange={(e) => setSelectedGenres(e.value)}
+                            options={genreList}
+                            optionLabel='label'
+                            display='chip'
+                            placeholder='Select up to 3 genres...'
+                            maxSelectedLabels={3}
+                            className='w-full md:w-20rem'
+                          />
+                        </div>
+                      </div>
+                      <div className='flex gap-[20px]'>
+                        <div className='w-full'>
+                          <label
+                            className='text-white p-1 mb-1 block'
+                            htmlFor='username'
+                          >
+                            Bio
+                          </label>
+                          <input
+                            type='text'
+                            placeholder={inputUserBio}
+                            value={inputUserBio}
+                            onChange={(e) => setInputUserBio(e.target.value)}
+                            className='rounded-xl w-full'
+                          />
+                        </div>
+                      </div>
+                      <div className='flex justify-end gap-[20px]'>
+                        <button className='px-4 py-[5px] mt-2 text-white bg-[#53A870] rounded-full font-normal'>
+                          Save Changes
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <div className='music_list_item px-[20px] pt-[20px] pb-[30px] flex flex-col gap-5 rounded-3xl mb-[10px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'>
+                  <div className=''>
+                    <h3 className='text-white text-[18px]'>Social</h3>
+                    <hr className='border-[#494949] mt-2' />
+                    <form className='mt-4 flex flex-col gap-5'>
+                      <div className='flex gap-[20px]'>
+                        <div className='w-full'>
+                          <label
+                            className='text-white p-1 mb-1 block'
+                            htmlFor='username'
+                          >
+                            YouTube
+                          </label>
+                          <input
+                            type='text'
+                            placeholder={inputUserYoutube}
+                            value={inputUserYoutube}
+                            onChange={(e) => setInputUserYoutube(e.target.value)}
+                            className='rounded-xl w-full'
+                          />
+                        </div>
+                        <div className='w-full'>
+                          <label
+                            className='text-white p-1 mb-1 block'
+                            htmlFor='age'
+                          >
+                            Instagram
+                          </label>
+                          <input
+                            type='text'
+                            placeholder={inputUserInsta}
+                            value={inputUserInsta}
+                            onChange={(e) => setInputUserInsta(e.target.value)}
+                            className='rounded-xl w-full'
+                          />
+                        </div>
+                      </div>
+                      <div className='flex gap-[20px]'>
+                        <div className='w-full'>
+                          <label
+                            className='text-white p-1 mb-1 block'
+                            htmlFor='username'
+                          >
+                            SoundCloud
+                          </label>
+                          <input
+                            type='text'
+                            placeholder={inputUserSoundcloud}
+                            value={inputUserSoundcloud}
+                            onChange={(e) => setInputUserSoundcloud(e.target.value)}
+                            className='rounded-xl w-full'
+                          />
+                        </div>
+                        <div className='w-full'>
+                          <label
+                            className='text-white p-1 mb-1 block'
+                            htmlFor='age'
+                          >
+                            Spotify
+                          </label>
+                          <input
+                            type='text'
+                            placeholder={inputUserSpotify}
+                            value={inputUserSpotify}
+                            onChange={(e) => setInputUserSpotify(e.target.value)}
+                            className='rounded-xl w-full'
+                          />
+                        </div>
+                      </div>
+                      <div className='flex justify-end gap-[20px]'>
+                        <button className='px-4 py-[5px] mt-2 text-white bg-[#53A870] rounded-full font-normal'>
+                          Save Changes
+                        </button>
                       </div>
                     </form>
                   </div>
