@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
+import { useRouter } from 'next/router';
 const rmtLogo =
   'https://ratemytone.com/wp-content/uploads/2024/09/RMT-Logo-lg-1.png';
 
 
 export default function Login() {
-
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const checkAuth = () => {
     const token = localStorage.getItem('rmt_token');
     if (token) {
-      window.location.replace('/');
+      router.push('/login');
     }
   };
   // Check Auth Status
