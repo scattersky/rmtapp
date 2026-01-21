@@ -3,21 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "prepare": "husky install",
-    "lint": "next lint"
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider next dev",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider next build",
+    "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.7",
     "@tailwindcss/forms": "^0.3.4",
     "autoprefixer": "^10.4.2",
+    "axios": "^1.13.2",
     "clsx": "^1.1.1",
+    "moment": "^2.30.1",
     "next": "^11.1.4",
     "postcss": "^8.4.6",
     "react": "^17.0.2",
+    "react_vertical_horizontal_tabs": "^1.0.3",
+    "react-audio-play": "^1.0.4",
     "react-dom": "^17.0.2",
-    "react-icons": "^4.3.1"
+    "react-icons": "^4.3.1",
+    "react-loader-spinner": "^8.0.0",
+    "react-rating-stars-component": "^2.2.0",
+    "react-slidedown": "^2.4.7",
+    "react-tooltip": "^5.30.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
