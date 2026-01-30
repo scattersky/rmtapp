@@ -27,6 +27,8 @@
     "react-icons": "^4.3.1",
     "react-loader-spinner": "^8.0.0",
     "react-rating-stars-component": "^2.2.0",
+    "react-select": "^5.10.2",
+    "react-select-country-list": "^2.2.3",
     "react-slidedown": "^2.4.7",
     "react-tooltip": "^5.30.0"
   },

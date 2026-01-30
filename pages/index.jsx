@@ -298,8 +298,8 @@ export default function Home() {
           </div>
         </div>
         {/*Page Content*/}
-        <div className='flex min-h-[100vh] flex-row max-w-[1300px] w-full py-6 px-6 gap-6'>
-          <div className='w-[20%]'>
+        <div className='flex flex-col md:flex-row min-h-[100vh] max-w-[1300px] w-full py-6 px-6 gap-6'>
+          <div className='w-full md:w-[20%]'>
             <h3 className='text-white text-[16px] font-bold tracking-[3px] uppercase mb-1 pl-2'>
               Search
             </h3>
@@ -412,17 +412,18 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className='w-[80%]'>
+          <div className='w-full md:w-[80%]'>
             {filteredData.map((post) => (
               <div
                 key={post.id}
                 className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'
               >
                 {/*Music List Card Upper*/}
-                <div className='w-full flex flex-row gap-4'>
+                <div className='w-full flex flex-col md:flex-row gap-4'>
                   <img
                     src={post.featured_media_src_url}
-                    className='w-full max-w-[250px] rounded-xl'
+                    className='w-full md:max-w-[250px] rounded-xl'
+                    alt='Tone Image'
                   />
                   <div className='flex flex-col gap-2 w-full justify-between'>
                     <div className='flex flex-row gap-2 w-full justify-end flex-wrap'>
@@ -481,7 +482,7 @@ export default function Home() {
                 </div>
 
                 {/*Music List Card Lower*/}
-                <div className='w-full flex flex-row gap-4 justify-between'>
+                <div className='w-full flex flex-col-reverse md:flex-row gap-4 justify-between'>
                   <Link
                     href={{
                       pathname: '/singletone',
@@ -493,11 +494,11 @@ export default function Home() {
                       },
                     }}
                   >
-                    <div className='py-2 px-[60px] text-white bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
+                    <div className='py-2 px-[60px] text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
                       Tone Notes
                     </div>
                   </Link>
-                  <div className='flex flex-row gap-6 items-center'>
+                  <div className='flex flex-row gap-6 items-center justify-between md:justify-start'>
                     <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
                       <MdFavorite
                         data-tooltip-id='fav-tooltip'

@@ -7,6 +7,7 @@ import moment from 'moment';
 import Header from '@/components/Header';
 import { MultiSelect } from 'primereact/multiselect';
 import { InputTextarea } from 'primereact/inputtextarea';
+import CountrySelector from '@/components/CountrySelect';
 
 
 function Dashboard() {
@@ -14,7 +15,8 @@ function Dashboard() {
   const router = useRouter();
   const params = router.query;
 
-  const [currentUser, setCurrentUser] = useState('');
+  const currentUserID = localStorage.getItem('user_id');
+  const [currentUser, setCurrentUser] = useState(currentUserID);
 
   const [currentUserData, setCurrentUserData] = useState([]);
   const [currentUserError, setCurrentUserError] = useState(null);
@@ -25,23 +27,22 @@ function Dashboard() {
     setSettingsVisible(true);
   }
 
-  useEffect(() => {
-    const fetchCurrentcurrentUserData = async () => {
-      try {
-        const currentUserID = localStorage.getItem('user_id');
+  const fetchCurrentUserData = async () => {
+    try {
 
-        setCurrentUser(currentUserID);
-        const response = await axios.get(
-          'https://ratemytone.com/wp-json/wp/v2/users/' + currentUserID
-        );
-        setCurrentUserData(response.data); // Axios data is in response.data
-        setCurrentUserLoading(false);
-      } catch (err) {
-        setCurrentUserError(err);
-        setCurrentUserLoading(false);
-      }
-    };
-    fetchCurrentcurrentUserData();
+      const response = await axios.get(
+        'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
+      );
+      setCurrentUserData(response.data); // Axios data is in response.data
+      setSelectedGenres(currentUserData.user_fav_genres);
+      setCurrentUserLoading(false);
+    } catch (err) {
+      setCurrentUserError(err);
+      setCurrentUserLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchCurrentUserData();
   }, []);
 
   // Profile Settings
@@ -56,6 +57,8 @@ function Dashboard() {
   const [inputUserInsta, setInputUserInsta] = useState(currentUserData.user_insta);
   const [inputUserSoundcloud, setInputUserSoundcloud] = useState(currentUserData.user_soundcloud);
   const [inputUserSpotify, setInputUserSpotify] = useState(currentUserData.user_spotify);
+
+
 
 
   const genreList = [
@@ -136,7 +139,7 @@ function Dashboard() {
                   className='cursor-pointer'
                 >
                   <div className='flex flex-row gap-2 items-center cursor-pointer font-normal text-[#53A870] text-[15px]'>
-                    @{currentUserData.slug}
+                    @{currentUserData.user_username}
                   </div>
                 </Link>
               </div>
@@ -187,8 +190,8 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={userUsername}
-                            value={userUsername}
+                            placeholder={currentUserData.user_username}
+                            value={currentUserData.user_username}
                             onChange={(e) => setUserUsername(e.target.value)}
                             className='rounded-xl w-full'
                           />
@@ -202,8 +205,8 @@ function Dashboard() {
                           </label>
                           <input
                             type='number'
-                            placeholder={inputUserAge}
-                            value={inputUserAge}
+                            placeholder={currentUserData.user_age}
+                            value={currentUserData.user_age}
                             onChange={(e) => setInputUserAge(e.target.value)}
                             className='rounded-xl w-full'
                           />
@@ -219,8 +222,8 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserCity}
-                            value={inputUserCity}
+                            placeholder={currentUserData.user_city}
+                            value={currentUserData.user_city}
                             onChange={(e) => setInputUserCity(e.target.value)}
                             className='rounded-xl w-full'
                           />
@@ -234,8 +237,8 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserState}
-                            value={inputUserState}
+                            placeholder={currentUserData.user_state}
+                            value={currentUserData.user_state}
                             onChange={(e) => setInputUserState(e.target.value)}
                             className='rounded-xl w-full'
                           />
@@ -247,13 +250,19 @@ function Dashboard() {
                           >
                             Country
                           </label>
-                          <input
-                            type='number'
-                            placeholder={inputUserCountry}
-                            value={inputUserCountry}
-                            onChange={(e) => setInputUserCountry(e.target.value)}
-                            className='rounded-xl w-full'
+                          <CountrySelector
+                            value={currentUserData.user_country}
+                            placeholder={currentUserData.user_country}
                           />
+                          {/*<input*/}
+                          {/*  type='number'*/}
+                          {/*  placeholder={currentUserData.user_country}*/}
+                          {/*  value={currentUserData.user_country}*/}
+                          {/*  onChange={(e) =>*/}
+                          {/*    setInputUserCountry(e.target.value)*/}
+                          {/*  }*/}
+                          {/*  className='rounded-xl w-full'*/}
+                          {/*/>*/}
                         </div>
                       </div>
                       <div className='flex justify-end gap-[20px]'>
@@ -283,7 +292,8 @@ function Dashboard() {
                             options={genreList}
                             optionLabel='label'
                             display='chip'
-                            placeholder='Select up to 3 genres...'
+                            // placeholder='Select up to 3 genres...'
+                            placeholder='Please select up to 3 genres...'
                             maxSelectedLabels={3}
                             className='w-full md:w-20rem'
                           />
@@ -299,8 +309,8 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserBio}
-                            value={inputUserBio}
+                            placeholder={currentUserData.user_bio}
+                            value={currentUserData.user_bio}
                             onChange={(e) => setInputUserBio(e.target.value)}
                             className='rounded-xl w-full'
                           />
@@ -329,9 +339,11 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserYoutube}
-                            value={inputUserYoutube}
-                            onChange={(e) => setInputUserYoutube(e.target.value)}
+                            placeholder={currentUserData.user_youtube}
+                            value={currentUserData.user_youtube}
+                            onChange={(e) =>
+                              setInputUserYoutube(e.target.value)
+                            }
                             className='rounded-xl w-full'
                           />
                         </div>
@@ -344,8 +356,8 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserInsta}
-                            value={inputUserInsta}
+                            placeholder={currentUserData.user_instagram}
+                            value={currentUserData.user_instagram}
                             onChange={(e) => setInputUserInsta(e.target.value)}
                             className='rounded-xl w-full'
                           />
@@ -361,9 +373,11 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserSoundcloud}
-                            value={inputUserSoundcloud}
-                            onChange={(e) => setInputUserSoundcloud(e.target.value)}
+                            placeholder={currentUserData.user_soudcloud}
+                            value={currentUserData.user_soundcloud}
+                            onChange={(e) =>
+                              setInputUserSoundcloud(e.target.value)
+                            }
                             className='rounded-xl w-full'
                           />
                         </div>
@@ -376,9 +390,11 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserSpotify}
-                            value={inputUserSpotify}
-                            onChange={(e) => setInputUserSpotify(e.target.value)}
+                            placeholder={currentUserData.user_spotify}
+                            value={currentUserData.user_spotify}
+                            onChange={(e) =>
+                              setInputUserSpotify(e.target.value)
+                            }
                             className='rounded-xl w-full'
                           />
                         </div>

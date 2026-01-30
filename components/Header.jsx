@@ -37,10 +37,10 @@ export default function Header() {
     >
       <div className='flex w-full max-w-[1300px] items-center justify-between p-4'>
         <div className=''>
-          <img src={rmtLogo} className='w-full max-w-[80px]' />
+          <img src={rmtLogo} className='w-full max-w-[80px]' alt="Rate My Tone Logo"/>
         </div>
         <div className='flex items-center justify-center gap-5'>
-          <div className='flex items-center justify-center'>
+          <div className='hidden md:flex items-center justify-center'>
             <a
               href='#'
               className='block text-white uppercase text-[16px] hover:text-[#3FE297] mr-5'

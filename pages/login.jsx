@@ -11,6 +11,7 @@ export default function Login() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loginFailure, setLoginFailure] = useState(false);
 
   const checkAuth = () => {
     const token = localStorage.getItem('rmt_token');
@@ -26,9 +27,11 @@ export default function Login() {
 
 
   const onUsernameChange = (event) => {
+    setLoginFailure(false);
     setUsername(event.target.value);
   };
   const onPasswordChange = (event) => {
+    setLoginFailure(false);
     setPassword(event.target.value);
   };
 
@@ -55,6 +58,7 @@ export default function Login() {
         checkAuth();
       })
       .catch((error) => {
+        setLoginFailure(true);
         console.error('Error making POST request:', error.message);
         if (error.response) {
           console.error('Error response data:', error.response.data);
@@ -70,10 +74,10 @@ export default function Login() {
     >
       <div
         id='loginPageLeft'
-        className='w-full h-full bg-[#141414] flex justify-center items-center'
+        className='w-full h-full bg-[#141414] flex justify-center items-start pt-[25vh]'
       >
         <div className='flex flex-col gap-6 items-center justify-center w-[100%] max-w-[300px]'>
-          <img src={rmtLogo} className='w-full max-w-[140px]' />
+          <img src={rmtLogo} className='w-full max-w-[140px]' alt="Rate My Tone Logo"/>
           <div id='loginForm' className='w-[100%] m-w-[600px]'>
             <label htmlFor='username' className='text-white px-2 mb-2 block'>
               Username:
@@ -99,6 +103,9 @@ export default function Login() {
             >
               Login
             </button>
+            {loginFailure && (
+              <p className='text-[#ff0000] mt-3 text-center'>Incorrect username and/or password.</p>
+            )}
           </div>
         </div>
       </div>
