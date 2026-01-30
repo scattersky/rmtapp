@@ -15,6 +15,7 @@ import { MdFavorite, MdModeComment, MdStarRate } from 'react-icons/md';
 import { SlideDown } from 'react-slidedown';
 import { IoSend } from 'react-icons/io5';
 import Header from '@/components/Header';
+import { Tooltip } from 'react-tooltip';
 
 
 
@@ -109,11 +110,10 @@ function Profile() {
 
   return (
     <div id='page'>
-      <Header/>
+      <Header />
       <div className='flex flex-1 flex-col items-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
         {/*Page Title*/}
         <div className='flex flex-row justify-evenly items-center w-full p-[20px] border-b-[3px] border-white mb-3'>
-
           <div className='max-w-[1300px] w-full px-6'>
             <h1 className='text-white text-[30px] font-bold leading-4 tracking-wider uppercase py-5'>
               Profile
@@ -121,8 +121,8 @@ function Profile() {
           </div>
         </div>
         {/*Page Content*/}
-        <div className='flex min-h-[100vh] flex-row max-w-[1300px] w-full py-6 px-6 justify-between gap-6'>
-          <div className='w-[20%]'>
+        <div className='flex flex-col md:flex-row min-h-[100vh] max-w-[1300px] w-full py-6 px-6 justify-between gap-6'>
+          <div className='w-full md:w-[20%]'>
             <div className='flex flex-col items-center gap-8 p-[20px] rounded-3xl'>
               <img
                 src={userData.author_image_url}
@@ -178,17 +178,18 @@ function Profile() {
               </div>
             </div>
           </div>
-          <div className='w-[80%]'>
+          <div className='w-full md:w-[80%]'>
             {data.map((post) => (
               <div
                 key={post.id}
                 className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'
               >
                 {/*Music List Card Upper*/}
-                <div className='w-full flex flex-row gap-4'>
+                <div className='w-full flex flex-col md:flex-row gap-4'>
                   <img
                     src={post.featured_media_src_url}
-                    className='w-full max-w-[250px] rounded-xl'
+                    className='w-full md:max-w-[250px] rounded-xl'
+                    alt='Tone Image'
                   />
                   <div className='flex flex-col gap-2 w-full justify-between'>
                     <div className='flex flex-row gap-2 w-full justify-end flex-wrap'>
@@ -247,7 +248,7 @@ function Profile() {
                 </div>
 
                 {/*Music List Card Lower*/}
-                <div className='w-full flex flex-row gap-4 justify-between'>
+                <div className='w-full flex flex-col-reverse md:flex-row gap-4 justify-between'>
                   <Link
                     href={{
                       pathname: '/singletone',
@@ -259,19 +260,29 @@ function Profile() {
                       },
                     }}
                   >
-                    <div className='py-2 px-[60px] text-white bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
+                    <div className='py-2 px-[60px] text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
                       Tone Notes
                     </div>
                   </Link>
-                  <div className='flex flex-row gap-6 items-center'>
+                  <div className='flex flex-row gap-6 items-center md:justify-start'>
                     <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
-                      <MdFavorite /> 3
+                      <MdFavorite
+                        data-tooltip-id='fav-tooltip'
+                        data-tooltip-content='Favorite'
+                      />
+                      3
+                      <Tooltip id='fav-tooltip' />
                     </div>
                     <div
                       className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'
                       onClick={() => toggleItem(post.id)}
                     >
-                      <MdModeComment /> 12
+                      <MdModeComment
+                        data-tooltip-id='rate-tooltip'
+                        data-tooltip-content='Rate My Tone'
+                      />
+                      12
+                      <Tooltip id='rate-tooltip' />
                     </div>
                     <ReactStars
                       edit={false}
@@ -279,6 +290,7 @@ function Profile() {
                       value={post.average_rating}
                       size={25}
                       activeColor='#ffd700'
+                      className='ml-auto'
                     />
                   </div>
                 </div>
@@ -286,41 +298,68 @@ function Profile() {
                 {/*Music Card Leave Review*/}
                 <SlideDown className={'my-dropdown-slidedown'}>
                   {openItemId === post.id && (
-                    <div className='w-full flex flex-row gap-4 justify-between items-center px-3 py-2 bg-[#3a3a3a] rounded-full'>
-                      <div className='w-[5%]'>
-                        <img
-                          src={userPlaceHolder}
-                          className='h-[40px] w-[40px] min-w-[40px] rounded-full object-center object-cover'
-                        />
-                      </div>
+                    <div>
+                      {reviewStatus ? (
+                        <div className='flex items-center justify-center w-full'>
+                          <p className='text-white'>
+                            You Have Already Rated This Tone.
+                          </p>
+                        </div>
+                      ) : (
+                        <form onSubmit={handleToneReviewSubmit}>
+                          <input
+                            type='hidden'
+                            value={post.id}
+                            name='reviewToneID'
+                          />
+                          <input
+                            type='hidden'
+                            value={post.title.rendered}
+                            name='reviewToneTitle'
+                          />
+                          <input
+                            type='hidden'
+                            value={post.author}
+                            name='reviewToneAuthor'
+                          />
+                          <div className='w-full flex flex-row gap-4 justify-between items-center px-3 py-2 bg-[#3a3a3a] rounded-full'>
+                            <div className='w-[5%]'>
+                              <img
+                                src={currentUserData.author_image_url}
+                                className='h-[40px] w-[40px] min-w-[40px] rounded-full object-center object-cover'
+                              />
+                            </div>
 
-                      <div className='w-[50%]'>
-                        <input
-                          type='text'
-                          className='w-full rounded-full text-white placeholder-white focus:border-[#53A870] focus:border-[3px] bg-[#707070]'
-                          onChange={onReviewTextChange} // 4. The onChange handler updates the state
-                          placeholder='Leave a review...'
-                        />
-                      </div>
-                      <div className='w-[15%]'>
-                        <ReactStars
-                          count={5}
-                          size={25}
-                          activeColor='#ffd700'
-                          onChange={onReviewRatingChange}
-                        />
-                      </div>
-                      <div className='w-[20%]'>
-                        <button
-                          type='submit'
-                          className='text-white h-[40px] w-full bg-[#53A870] text-center flex justify-center gap-2 items-center rounded-full'
-                        >
-                          <span className='text-white text-[16px]'>
-                            Submit Review
-                          </span>
-                          <IoSend />
-                        </button>
-                      </div>
+                            <div className='w-[50%]'>
+                              <input
+                                type='text'
+                                className='w-full rounded-full text-white placeholder-white focus:border-[#53A870] focus:border-[3px] bg-[#707070]'
+                                onChange={onReviewTextChange}
+                                placeholder='Leave a review...'
+                              />
+                            </div>
+                            <div className='w-[15%]'>
+                              <ReactStars
+                                count={5}
+                                size={25}
+                                activeColor='#ffd700'
+                                onChange={onReviewRatingChange}
+                              />
+                            </div>
+                            <div className='w-[20%]'>
+                              <button
+                                type='submit'
+                                className='text-white h-[40px] w-full bg-[#53A870] text-center flex justify-center gap-2 items-center rounded-full'
+                              >
+                                <span className='text-white text-[16px]'>
+                                  Submit Review
+                                </span>
+                                <IoSend />
+                              </button>
+                            </div>
+                          </div>
+                        </form>
+                      )}
                     </div>
                   )}
                 </SlideDown>

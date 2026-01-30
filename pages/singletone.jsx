@@ -195,14 +195,23 @@ function SingleTone() {
         {/*Page Title*/}
         <div className='flex flex-row justify-evenly items-center w-full p-[20px] border-b-[3px] border-white mb-3'>
           <div className='max-w-[1300px] w-full px-6'>
-            <h1 className='text-white text-[30px] font-bold leading-4 tracking-wider uppercase py-5'>
+            <div className='block md:hidden'>
+              <ReactStars
+                edit={false}
+                count={5}
+                value={data.average_rating}
+                size={25}
+                activeColor='#ffd700'
+              />
+            </div>
+            <h1 className='text-white text-[30px] font-bold leading-[36px] tracking-wider uppercase py-5'>
               {params.title}
             </h1>
           </div>
         </div>
         {/*Page Content*/}
-        <div className='flex min-h-[100vh] flex-row max-w-[1300px] w-full py-6 px-6 justify-between gap-6'>
-          <div className='w-[20%]'>
+        <div className='flex flex-col-reverse md:flex-row min-h-[100vh] max-w-[1300px] w-full py-6 px-6 justify-between gap-6'>
+          <div className='w-full md:w-[20%]'>
             <div className='flex flex-col items-center gap-8 p-[20px] rounded-3xl'>
               <img
                 src={authorData.author_image_url}
@@ -258,24 +267,26 @@ function SingleTone() {
               </div>
             </div>
           </div>
-          <div className='w-[80%]'>
+          <div className='w-full md:w-[80%]'>
             <div className='flex flex-col items-center w-[100%] gap-4'>
-              <div className='rounded-3xl mb-[10px] shadowwhite w-[100%] p-[20px] gap-6 flex flex-row justify-center border-[1px] border-[rgba(255,255,255,0.3)]'>
-                <div className='w-[50%] flex pt-[0px] pb-[0px]'>
+              <div className='rounded-3xl mb-[10px] shadowwhite w-[100%] p-[20px] gap-6 flex flex-col md:flex-row justify-center border-[1px] border-[rgba(255,255,255,0.3)]'>
+                <div className='w-full md:w-[50%] flex pt-[0px] pb-[0px]'>
                   <img
                     src={data.featured_media_src_url}
                     className='w-[100%] rounded-xl max-h-[45vh] object-cover object-center flex-1'
                   />
                 </div>
-                <div className='w-[50%] flex flex-col justify-evenly gap-2 p-[0px]'>
+                <div className='w-full md:w-[50%] flex flex-col justify-evenly gap-2 p-[0px]'>
                   <div className='flex flex-col gap-1 items-end justify-center'>
-                    <ReactStars
-                      edit={false}
-                      count={5}
-                      value={data.average_rating}
-                      size={25}
-                      activeColor='#ffd700'
-                    />
+                    <div className='hidden md:block'>
+                      <ReactStars
+                        edit={false}
+                        count={5}
+                        value={data.average_rating}
+                        size={25}
+                        activeColor='#ffd700'
+                      />
+                    </div>
                   </div>
                   <div className='flex flex-col'>
                     <div className='flex flex-row items-end gap-1 mb-1'>

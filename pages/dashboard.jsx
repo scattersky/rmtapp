@@ -83,6 +83,35 @@ function Dashboard() {
   ];
 
 
+  const handleUserYoutubeChange = (event) => {
+    setInputUserYoutube(event.target.value);
+  }
+  const handleUpdateUserSocial = (event)=>{
+    event.preventDefault();
+
+    axios
+      .post(
+        'https://ratemytone.com/rmt_api_dashboard_social.php',
+        {
+          userYoutube: inputUserYoutube,
+          userInsta: inputUserInsta,
+          userSoundcloud: inputUserSoundcloud,
+          userSpotify: inputUserSpotify,
+          userID: currentUserID,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        console.error('Error submitting form:', error);
+      });
+  }
 
 
   if (currentUserLoading)
@@ -340,10 +369,9 @@ function Dashboard() {
                           <input
                             type='text'
                             placeholder={currentUserData.user_youtube}
-                            value={currentUserData.user_youtube}
-                            onChange={(e) =>
-                              setInputUserYoutube(e.target.value)
-                            }
+                            defaultValue={currentUserData.user_youtube}
+                            onChange={(e) => setInputUserYoutube(e.target.value)}
+
                             className='rounded-xl w-full'
                           />
                         </div>
@@ -400,7 +428,10 @@ function Dashboard() {
                         </div>
                       </div>
                       <div className='flex justify-end gap-[20px]'>
-                        <button className='px-4 py-[5px] mt-2 text-white bg-[#53A870] rounded-full font-normal'>
+                        <button
+                          className='px-4 py-[5px] mt-2 text-white bg-[#53A870] rounded-full font-normal'
+                          onClick={handleUpdateUserSocial}
+                        >
                           Save Changes
                         </button>
                       </div>

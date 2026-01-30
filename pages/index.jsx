@@ -16,6 +16,7 @@ import { MdArrowUpward } from 'react-icons/md';
 import { Tooltip } from 'react-tooltip'
 import { useRouter } from "next/router";
 
+
 export default function Home() {
   const router = useRouter();
   // Check Auth Status
@@ -498,7 +499,7 @@ export default function Home() {
                       Tone Notes
                     </div>
                   </Link>
-                  <div className='flex flex-row gap-6 items-center justify-between md:justify-start'>
+                  <div className='flex flex-row gap-6 items-center md:justify-start'>
                     <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
                       <MdFavorite
                         data-tooltip-id='fav-tooltip'
@@ -524,6 +525,7 @@ export default function Home() {
                       value={post.average_rating}
                       size={25}
                       activeColor='#ffd700'
+                      className='ml-auto'
                     />
                   </div>
                 </div>
