@@ -32,6 +32,9 @@ function Profile() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+
+  const [reviewStatus, setReviewStatus] = useState(false);
+
   const [reviewData, setReviewData] = useState([]);
   const [reviewError, setReviewError] = useState(null);
   const [reviewLoading, setReviewLoading] = useState(true);
@@ -81,6 +84,57 @@ function Profile() {
 
 
   }, []);
+
+  const handleToneReviewSubmit = async (event) => {
+    event.preventDefault();
+    const token = localStorage.getItem('rmt_token');
+
+    if (!token) {
+      console.error('No JWT token found. User not authenticated.');
+      return;
+    }
+    const form = event.target;
+    const formData = new FormData(form);
+    const reviewToneID = formData.get('reviewToneID');
+    const reviewToneTitle = formData.get('reviewToneTitle');
+    const reviewToneAuthor = formData.get('reviewToneAuthor');
+
+    try {
+      const response = await axios.post(
+        'https://ratemytone.com/wp-json/wp/v2/tone-review',
+        // Data payload
+        {
+          title: reviewToneTitle,
+          content: reviewText,
+          status: 'publish',
+          acf: {
+            tone_review_tone_id: reviewToneID,
+            tone_review_stars: reviewRating,
+            tone_review_text: reviewText,
+            tone_review_reviewed_by: userData.id,
+            tone_review_reviewed_by_name: userData.name,
+            tone_review_tone_author_id: reviewToneAuthor,
+          },
+        },
+        // Configuration object for headers
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Attach the JWT
+          },
+        }
+      );
+      const triggerReviewStatus = () => {
+        setReviewStatus(true);
+      };
+      triggerReviewStatus();
+      console.log('Post created successfully:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating post:', error.response.data.message);
+      throw new Error(error.response.data.message);
+    }
+  };
 
   if (loading || userLoading)
 
@@ -325,7 +379,7 @@ function Profile() {
                           <div className='w-full flex flex-row gap-4 justify-between items-center px-3 py-2 bg-[#3a3a3a] rounded-full'>
                             <div className='w-[5%]'>
                               <img
-                                src={currentUserData.author_image_url}
+                                src={userData.author_image_url}
                                 className='h-[40px] w-[40px] min-w-[40px] rounded-full object-center object-cover'
                               />
                             </div>

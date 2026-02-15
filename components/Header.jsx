@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 
@@ -37,7 +37,11 @@ export default function Header() {
     >
       <div className='flex w-full max-w-[1300px] items-center justify-between p-4'>
         <div className=''>
-          <img src={rmtLogo} className='w-full max-w-[80px]' alt="Rate My Tone Logo"/>
+          <img
+            src={rmtLogo}
+            className='w-full max-w-[80px]'
+            alt='Rate My Tone Logo'
+          />
         </div>
         <div className='flex items-center justify-center gap-5'>
           <div className='hidden md:flex items-center justify-center'>
@@ -47,12 +51,17 @@ export default function Header() {
             >
               Home
             </a>
-            <a
-              href='/'
-              className='block text-white uppercase text-[16px] hover:text-[#3FE297] mr-5'
+            <Link
+              href={{
+                pathname: '/',
+              }}
+              className='cursor-pointer'
             >
-              Tone Feed
-            </a>
+              <span className=' block text-white uppercase text-[16px] hover:text-[#3FE297] mr-5 cursor-pointer'>
+                Tone Feed
+              </span>
+            </Link>
+
             <a
               href='#'
               className='block text-white uppercase text-[16px] hover:text-[#3FE297] mr-5'

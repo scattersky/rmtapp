@@ -3,7 +3,7 @@ import  Header  from '../components/Header';
 import axios from 'axios'
 import Link from 'next/link';
 import { FaRegComments } from 'react-icons/fa6';
-import { MdFavorite, MdModeComment } from 'react-icons/md';
+import { MdFavorite, MdFavoriteBorder, MdModeComment } from 'react-icons/md';
 import { AudioPlayer } from 'react-audio-play';
 import { Audio } from 'react-loader-spinner'
 import ReactStars from 'react-rating-stars-component/dist/react-stars';
@@ -258,6 +258,66 @@ export default function Home() {
     }
   };
 
+  const [userFavorites, setUserFavorites] = useState([]);
+
+  const getUserFavorites = async () => {
+    const currentUser = localStorage.getItem('user_id');
+    const response = await axios.get(
+      'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
+    );
+    setUserFavorites(response.data.user_favorites);
+  }
+  useEffect(() => {
+    getUserFavorites();
+  }, []);
+
+  const handleAddToFavorites = async (postID) => {
+    if (!userFavorites.includes(postID)) {
+      const updatedFavorites = [...userFavorites, postID];
+      setUserFavorites(updatedFavorites);
+      try {
+        const currentUser = localStorage.getItem('user_id');
+        await axios.post(
+          `https://ratemytone.com/wp-json/custom/v1/favorites/${currentUser}`,
+          {
+            favorites: userFavorites,
+          }
+        );
+      } catch (error) {
+        console.error('Error Updating Favorites:', error.response.data.message);
+      }
+    }
+  };
+
+  // const isUserFav = (postID) => {
+  //   if (userFavorites.includes(postID)) {
+  //     return (
+  //       <div className='flex flex-row gap-1 items-center justify-center text-[25px] text-white cursor-pointer'>
+  //         <MdFavorite
+  //           data-tooltip-id='fav-tooltip'
+  //           data-tooltip-content='Favorited'
+  //           color='#b50000'
+  //         />
+  //         <span className='text-[20px]'>3</span>
+  //         <Tooltip id='fav-tooltip' />
+  //       </div>
+  //     );
+  //   } else {
+  //     return (
+  //       <div className='flex flex-row gap-1 items-center justify-center text-[25px] text-white cursor-pointer'>
+  //         <MdFavorite
+  //           data-tooltip-id='fav-tooltip'
+  //           data-tooltip-content='Favorite'
+  //           color='#b7b7b7'
+  //           onClick={handleAddToFavorites(postID)}
+  //         />
+  //         <span className='text-[20px]'>3</span>
+  //         <Tooltip id='fav-tooltip' />
+  //       </div>
+  //     );
+  //   }
+  //
+  // }
 
 
 
@@ -414,192 +474,206 @@ export default function Home() {
             </div>
           </div>
           <div className='w-full md:w-[80%]'>
-            {filteredData.map((post) => (
-              <div
-                key={post.id}
-                className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'
-              >
-                {/*Music List Card Upper*/}
-                <div className='w-full flex flex-col md:flex-row gap-4'>
-                  <img
-                    src={post.featured_media_src_url}
-                    className='w-full md:max-w-[250px] rounded-xl'
-                    alt='Tone Image'
-                  />
-                  <div className='flex flex-col gap-2 w-full justify-between'>
-                    <div className='flex flex-row gap-2 w-full justify-end flex-wrap'>
-                      {post.genres.map((genre) => (
-                        <div
-                          key={genre.id}
-                          className='text-white bg-[#8E8E8E] text-[16px] px-3 py-1 rounded-full'
+            {filteredData.map((post) => {
+              const isFav = userFavorites.has(post.id);
+              return (
+                <div
+                  key={post.id}
+                  className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'
+                >
+                  {/*Music List Card Upper*/}
+                  <div className='w-full flex flex-col md:flex-row gap-4'>
+                    <img
+                      src={post.featured_media_src_url}
+                      className='w-full md:max-w-[250px] rounded-xl'
+                      alt='Tone Image'
+                    />
+                    <div className='flex flex-col gap-2 w-full justify-between'>
+                      <div className='flex flex-row gap-2 w-full justify-end flex-wrap'>
+                        {post.genres.map((genre) => (
+                          <div
+                            key={genre.id}
+                            className='text-white bg-[#8E8E8E] text-[16px] px-3 py-1 rounded-full'
+                          >
+                            {genre}
+                          </div>
+                        ))}
+                        {post.instruments.map((instrument) => (
+                          <div
+                            key={instrument.id}
+                            className='text-white bg-[#53A870] text-[16px] px-3 py-1 rounded-full'
+                          >
+                            {instrument}
+                          </div>
+                        ))}
+                      </div>
+                      <div className='flex flex-col gap-1 w-full'>
+                        <Link
+                          href={{
+                            pathname: '/profile',
+                            query: { id: post.author, name: post.author_name },
+                          }}
+                          className='cursor-pointer'
                         >
-                          {genre}
-                        </div>
-                      ))}
-                      {post.instruments.map((instrument) => (
-                        <div
-                          key={instrument.id}
-                          className='text-white bg-[#53A870] text-[16px] px-3 py-1 rounded-full'
-                        >
-                          {instrument}
-                        </div>
-                      ))}
-                    </div>
-                    <div className='flex flex-col gap-1 w-full'>
-                      <Link
-                        href={{
-                          pathname: '/profile',
-                          query: { id: post.author, name: post.author_name },
-                        }}
-                        className='cursor-pointer'
-                      >
-                        <div className='flex flex-row gap-2 items-center cursor-pointer text-[#53A870] text-[18px]'>
-                          <img
-                            src={post.author_image_url}
-                            className='h-[35px] w-[35px] rounded-full ml-1'
+                          <div className='flex flex-row gap-2 items-center cursor-pointer text-[#53A870] text-[18px]'>
+                            <img
+                              src={post.author_image_url}
+                              className='h-[35px] w-[35px] rounded-full ml-1'
+                            />
+                            @{post.author_name}
+                          </div>
+                        </Link>
+                        <h3 className='text-white text-[26px] ml-1 mb-1'>
+                          {post.title.rendered}
+                        </h3>
+                        <div className='min-w-[100%] w-[100%] rounded-full overflow-hidden'>
+                          <AudioPlayer
+                            src={post.acf.music_url}
+                            className=''
+                            backgroundColor='#272727'
+                            width='100%'
+                            sliderColor='#53A870'
                           />
-                          @{post.author_name}
                         </div>
-                      </Link>
-                      <h3 className='text-white text-[26px] ml-1 mb-1'>
-                        {post.title.rendered}
-                      </h3>
-                      <div className='min-w-[100%] w-[100%] rounded-full overflow-hidden'>
-                        <AudioPlayer
-                          src={post.acf.music_url}
-                          className=''
-                          backgroundColor='#272727'
-                          width='100%'
-                          sliderColor='#53A870'
-                        />
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/*Music List Card Middle*/}
-                <div className='w-full flex flex-1'>
-                  <p className='text-white'>{post.plain_text_excerpt}</p>
-                </div>
-
-                {/*Music List Card Lower*/}
-                <div className='w-full flex flex-col-reverse md:flex-row gap-4 justify-between'>
-                  <Link
-                    href={{
-                      pathname: '/singletone',
-                      query: {
-                        id: post.id,
-                        title: post.title.rendered,
-                        author: post.author,
-                        author_name: post.author_name,
-                      },
-                    }}
-                  >
-                    <div className='py-2 px-[60px] text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
-                      Tone Notes
-                    </div>
-                  </Link>
-                  <div className='flex flex-row gap-6 items-center md:justify-start'>
-                    <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
-                      <MdFavorite
-                        data-tooltip-id='fav-tooltip'
-                        data-tooltip-content='Favorite'
-                      />
-                      3
-                      <Tooltip id='fav-tooltip' />
-                    </div>
-                    <div
-                      className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'
-                      onClick={() => toggleItem(post.id)}
-                    >
-                      <MdModeComment
-                        data-tooltip-id='rate-tooltip'
-                        data-tooltip-content='Rate My Tone'
-                      />
-                      12
-                      <Tooltip id='rate-tooltip' />
-                    </div>
-                    <ReactStars
-                      edit={false}
-                      count={5}
-                      value={post.average_rating}
-                      size={25}
-                      activeColor='#ffd700'
-                      className='ml-auto'
-                    />
+                  {/*Music List Card Middle*/}
+                  <div className='w-full flex flex-1'>
+                    <p className='text-white'>{post.plain_text_excerpt}</p>
                   </div>
-                </div>
 
-                {/*Music Card Leave Review*/}
-                <SlideDown className={'my-dropdown-slidedown'}>
-                  {openItemId === post.id && (
-                    <div>
-                      {reviewStatus ? (
-                        <div className='flex items-center justify-center w-full'>
-                          <p className='text-white'>
-                            You Have Already Rated This Tone.
-                          </p>
+                  {/*Music List Card Lower*/}
+                  <div className='w-full flex flex-col-reverse md:flex-row gap-4 justify-between'>
+                    <Link
+                      href={{
+                        pathname: '/singletone',
+                        query: {
+                          id: post.id,
+                          title: post.title.rendered,
+                          author: post.author,
+                          author_name: post.author_name,
+                        },
+                      }}
+                    >
+                      <div className='py-2 px-[60px] text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
+                        Tone Notes
+                      </div>
+                    </Link>
+                    <div className='flex flex-row gap-6 items-center md:justify-start'>
+                      <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
+                        {/*<MdFavorite*/}
+                        {/*  data-tooltip-id='fav-tooltip'*/}
+                        {/*  data-tooltip-content='Favorite'*/}
+                        {/*/>*/}
+                        {/*3*/}
+                        {/*<Tooltip id='fav-tooltip' />*/}
+                        {/*{isUserFav(post.id)}*/}
+                        <div
+                          className='flex flex-row gap-1 items-center text-[20px] text-white cursor-pointer'
+                          onClick={() => handleAddToFavorites(post.id)}
+                        >
+                          {isFav ? (
+                            <MdFavorite color='red' />
+                          ) : (
+                            <MdFavoriteBorder />
+                          )}
                         </div>
-                      ) : (
-                        <form onSubmit={handleToneReviewSubmit}>
-                          <input
-                            type='hidden'
-                            value={post.id}
-                            name='reviewToneID'
-                          />
-                          <input
-                            type='hidden'
-                            value={post.title.rendered}
-                            name='reviewToneTitle'
-                          />
-                          <input
-                            type='hidden'
-                            value={post.author}
-                            name='reviewToneAuthor'
-                          />
-                          <div className='w-full flex flex-row gap-4 justify-between items-center px-3 py-2 bg-[#3a3a3a] rounded-full'>
-                            <div className='w-[5%]'>
-                              <img
-                                src={currentUserData.author_image_url}
-                                className='h-[40px] w-[40px] min-w-[40px] rounded-full object-center object-cover'
-                              />
-                            </div>
-
-                            <div className='w-[50%]'>
-                              <input
-                                type='text'
-                                className='w-full rounded-full text-white placeholder-white focus:border-[#53A870] focus:border-[3px] bg-[#707070]'
-                                onChange={onReviewTextChange}
-                                placeholder='Leave a review...'
-                              />
-                            </div>
-                            <div className='w-[15%]'>
-                              <ReactStars
-                                count={5}
-                                size={25}
-                                activeColor='#ffd700'
-                                onChange={onReviewRatingChange}
-                              />
-                            </div>
-                            <div className='w-[20%]'>
-                              <button
-                                type='submit'
-                                className='text-white h-[40px] w-full bg-[#53A870] text-center flex justify-center gap-2 items-center rounded-full'
-                              >
-                                <span className='text-white text-[16px]'>
-                                  Submit Review
-                                </span>
-                                <IoSend />
-                              </button>
-                            </div>
-                          </div>
-                        </form>
-                      )}
+                      </div>
+                      <div
+                        className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'
+                        onClick={() => toggleItem(post.id)}
+                      >
+                        <MdModeComment
+                          data-tooltip-id='rate-tooltip'
+                          data-tooltip-content='Rate My Tone'
+                        />
+                        12
+                        <Tooltip id='rate-tooltip' />
+                      </div>
+                      <ReactStars
+                        edit={false}
+                        count={5}
+                        value={post.average_rating}
+                        size={25}
+                        activeColor='#ffd700'
+                        className='ml-auto'
+                      />
                     </div>
-                  )}
-                </SlideDown>
-              </div>
-            ))}
+                  </div>
+
+                  {/*Music Card Leave Review*/}
+                  <SlideDown className={'my-dropdown-slidedown'}>
+                    {openItemId === post.id && (
+                      <div>
+                        {reviewStatus ? (
+                          <div className='flex items-center justify-center w-full'>
+                            <p className='text-white'>
+                              You Have Already Rated This Tone.
+                            </p>
+                          </div>
+                        ) : (
+                          <form onSubmit={handleToneReviewSubmit}>
+                            <input
+                              type='hidden'
+                              value={post.id}
+                              name='reviewToneID'
+                            />
+                            <input
+                              type='hidden'
+                              value={post.title.rendered}
+                              name='reviewToneTitle'
+                            />
+                            <input
+                              type='hidden'
+                              value={post.author}
+                              name='reviewToneAuthor'
+                            />
+                            <div className='w-full flex flex-row gap-4 justify-between items-center px-3 py-2 bg-[#3a3a3a] rounded-full'>
+                              <div className='w-[5%]'>
+                                <img
+                                  src={currentUserData.author_image_url}
+                                  className='h-[40px] w-[40px] min-w-[40px] rounded-full object-center object-cover'
+                                />
+                              </div>
+
+                              <div className='w-[50%]'>
+                                <input
+                                  type='text'
+                                  className='w-full rounded-full text-white placeholder-white focus:border-[#53A870] focus:border-[3px] bg-[#707070]'
+                                  onChange={onReviewTextChange}
+                                  placeholder='Leave a review...'
+                                />
+                              </div>
+                              <div className='w-[15%]'>
+                                <ReactStars
+                                  count={5}
+                                  size={25}
+                                  activeColor='#ffd700'
+                                  onChange={onReviewRatingChange}
+                                />
+                              </div>
+                              <div className='w-[20%]'>
+                                <button
+                                  type='submit'
+                                  className='text-white h-[40px] w-full bg-[#53A870] text-center flex justify-center gap-2 items-center rounded-full'
+                                >
+                                  <span className='text-white text-[16px]'>
+                                    Submit Review
+                                  </span>
+                                  <IoSend />
+                                </button>
+                              </div>
+                            </div>
+                          </form>
+                        )}
+                      </div>
+                    )}
+                  </SlideDown>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

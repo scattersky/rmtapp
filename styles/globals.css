@@ -86,3 +86,11 @@ input{
   color: white;
   padding: 8px 15px;
 }
+
+
+.Toastify__progress-bar{
+  background: #0CA771; /* green */
+}
+.Toastify__toast-icon svg {
+  fill: #0CA771; /* indigo */
+}
