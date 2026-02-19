@@ -122,6 +122,7 @@ function Dashboard() {
 
   const fetchFavTones = async () => {
     try {
+
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/music_list'
       );
@@ -132,6 +133,7 @@ function Dashboard() {
   };
   const fetchReviewsGiven= async () => {
     try {
+      const currentUser = localStorage.getItem('user_id');
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/tone-review?reviewed_by=' +
           currentUser
@@ -143,6 +145,7 @@ function Dashboard() {
   };
   const fetchReviewsReceived = async () => {
     try {
+      const currentUser = localStorage.getItem('user_id');
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/tone-review?tone_author_id=' +
           currentUser
@@ -155,7 +158,7 @@ function Dashboard() {
 
   const fetchCurrentUserData = async () => {
     try {
-      const currentUserID = localStorage.getItem('user_id');
+      const currentUser = localStorage.getItem('user_id');
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
       );
@@ -201,7 +204,7 @@ function Dashboard() {
   };
   const handleUpdateUserSocial = (event) => {
     event.preventDefault();
-
+    const currentUser = localStorage.getItem('user_id');
     axios
       .post(
         'https://ratemytone.com/rmt_api_dashboard_social.php',
@@ -210,7 +213,7 @@ function Dashboard() {
           userInsta: inputUserInsta,
           userSoundcloud: inputUserSoundcloud,
           userSpotify: inputUserSpotify,
-          userID: currentUserID,
+          userID: currentUser,
         },
         {
           headers: {
