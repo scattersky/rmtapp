@@ -33,8 +33,16 @@ function Dashboard() {
   const router = useRouter();
   const params = router.query;
 
-  const currentUserID = localStorage.getItem('user_id');
-  const [currentUser, setCurrentUser] = useState(currentUserID);
+  //const currentUserID = localStorage.getItem('user_id');
+  const [currentUser, setCurrentUser] = useState('');
+
+
+  useEffect(() => {
+    const currentUserID = localStorage.getItem('user_id');
+    if (currentUserID) {
+      setCurrentUser(currentUserID);
+    }
+  }, []);
 
   const [currentUserData, setCurrentUserData] = useState([]);
   const [currentUserError, setCurrentUserError] = useState(null);
@@ -147,6 +155,7 @@ function Dashboard() {
 
   const fetchCurrentUserData = async () => {
     try {
+      const currentUserID = localStorage.getItem('user_id');
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
       );

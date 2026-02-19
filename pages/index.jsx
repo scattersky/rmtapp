@@ -49,6 +49,7 @@ export default function Home() {
   const [currentUserError, setCurrentUserError] = useState(null);
   const [currentUserLoading, setCurrentUserLoading] = useState(true);
 
+
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]); // Stores data to display
   const [searchTerm, setSearchTerm] = useState('');
@@ -266,21 +267,39 @@ export default function Home() {
       'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
     );
     setUserFavorites(response.data.user_favorites);
+    console.log(userFavorites);
   }
   useEffect(() => {
     getUserFavorites();
   }, []);
 
   const handleAddToFavorites = async (postID) => {
+    const currentUser = localStorage.getItem('user_id');
     if (!userFavorites.includes(postID)) {
+
       const updatedFavorites = [...userFavorites, postID];
       setUserFavorites(updatedFavorites);
+      console.log(updatedFavorites);
       try {
-        const currentUser = localStorage.getItem('user_id');
+
         await axios.post(
           `https://ratemytone.com/wp-json/custom/v1/favorites/${currentUser}`,
           {
-            favorites: userFavorites,
+            favorites: updatedFavorites,
+          }
+        );
+      } catch (error) {
+        console.error('Error Updating Favorites:', error.response.data.message);
+      }
+    } else {
+      const updatedFavorites = userFavorites.filter((id) => id !== postID);
+      setUserFavorites(updatedFavorites);
+      console.log(updatedFavorites);
+      try {
+        await axios.post(
+          `https://ratemytone.com/wp-json/custom/v1/favorites/${currentUser}`,
+          {
+            favorites: updatedFavorites,
           }
         );
       } catch (error) {
@@ -475,7 +494,7 @@ export default function Home() {
           </div>
           <div className='w-full md:w-[80%]'>
             {filteredData.map((post) => {
-              const isFav = userFavorites.has(post.id);
+              const isFav = userFavorites.includes(post.id);
               return (
                 <div
                   key={post.id}
@@ -680,3 +699,4 @@ export default function Home() {
     </div>
   );
 }
+
