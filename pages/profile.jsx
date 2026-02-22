@@ -136,6 +136,15 @@ function Profile() {
     }
   };
 
+  // BADGE IMAGE URLS
+  const postsMoreThan20 = 'https://ratemytone.com/wp-content/uploads/2026/02/b_20posts.webp';
+  const badgeReviewsGiven =
+    'https://ratemytone.com/wp-content/uploads/2026/02/b_reviews_given.webp';
+  const badgeReviewsReceived =
+    'https://ratemytone.com/wp-content/uploads/2026/02/b_reviews_received.webp';
+  const badgeToneFavsRecieved =
+    'https://ratemytone.com/wp-content/uploads/2026/02/b_favs_recieved.webp';
+
   if (loading || userLoading)
 
     return (
@@ -195,6 +204,46 @@ function Profile() {
                     @{params.name}
                   </div>
                 </Link>
+                <div className='flex items-center justify-center gap-2 mt-4'>
+                  <div>
+                    <img
+                      data-tooltip-id='badge20posts'
+                      data-tooltip-content='20+ Tones Posted'
+                      src={badgeReviewsGiven}
+                      className='w-[30px]'
+                    />
+                    <Tooltip id='badge20posts' />
+                  </div>
+                  <div>
+                    <img
+                      data-tooltip-id='badge20posts'
+                      data-tooltip-content='20+ Tones Posted'
+                      src={badgeReviewsReceived}
+                      className='w-[30px]'
+                    />
+                    <Tooltip id='badge20posts' />
+                  </div>
+                  <div>
+                    <img
+                      data-tooltip-id='badge20posts'
+                      data-tooltip-content='20+ Tones Posted'
+                      src={badgeToneFavsRecieved}
+                      className='w-[30px]'
+                    />
+                    <Tooltip id='badge20posts' />
+                  </div>
+                  {+userData.user_post_count >= 20 ? (
+                    <div>
+                      <img
+                        data-tooltip-id='badge20posts'
+                        data-tooltip-content='20+ Tones Posted'
+                        src={postsMoreThan20}
+                        className='w-[30px]'
+                      />
+                      <Tooltip id='badge20posts' />
+                    </div>
+                  ) : null}
+                </div>
               </div>
               <div className='text-center'>
                 <strong className='text-white uppercase text-[12px] tracking-[2px] block'>

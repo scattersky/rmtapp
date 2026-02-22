@@ -131,6 +131,29 @@ function Dashboard() {
       console.log(err);
     }
   };
+
+  const [userFavorites, setUserFavorites] = useState([]);
+  const [userFavoriteIDs, setUserFavoriteIDs] = useState([]);
+
+  const getUserFavorites = async () => {
+    const currentUser = localStorage.getItem('user_id');
+    const response = await axios.get(
+      'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
+    );
+    setUserFavoriteIDs(response.data.user_favorites);
+    const userFavoritesString = userFavoriteIDs.join();
+    const response2 = await axios.get(
+      'https://ratemytone.com/wp-json/wp/v2/music_list?include=' +
+        userFavoritesString
+    );
+    setUserFavorites(response2.data);
+  }
+  useEffect(() => {
+    getUserFavorites();
+  }, []);
+
+
+
   const fetchReviewsGiven= async () => {
     try {
       const currentUser = localStorage.getItem('user_id');
@@ -581,7 +604,8 @@ function Dashboard() {
             {favoritesVisible && (
               <div className='music_list_item p-[20px] flex flex-col gap-5'>
                 <h2 className='text-white text-[22px]'>Favorites</h2>
-                {favTones.map((post) => (
+
+                {userFavorites.map((post) => (
                   <div
                     key={post.id}
                     className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'
@@ -698,8 +722,10 @@ function Dashboard() {
                     </div>
                   </div>
                 ))}
+                {userFavorites.length === 0 && <p className='text-white'>You have no favorite tones yet. Head over to the <Link href='index.jsx' className='text-[#53A870] font-bold'>Tone Feed</Link> to start listening!</p>}
               </div>
             )}
+
             {reviewsVisible && (
               <div className='music_list_item p-[20px] flex flex-col gap-5'>
                 <h2 className='text-white text-[30px]'>Reviews</h2>
