@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -14,35 +15,42 @@ import {AudioPlayer} from "react-audio-play";
 import { MdFavorite, MdModeComment } from 'react-icons/md';
 import {Tooltip} from "react-tooltip";
 import ReactStars from "react-rating-stars-component";
-import {SlideDown} from "react-slidedown";
-import {IoSend} from "react-icons/io5";
+
 import moment from 'moment';
 
+import Cookies from 'js-cookie';
+
 function Dashboard() {
-  const notify = () =>
-    toast.success('Success!', {
-      position: 'top-center',
-      autoClose: 5000,
+  // Get Cookie Data
+  const token = Cookies.get('rmt_token');
+  const user_id = Cookies.get('user_id');
+
+useEffect(() => {
+  const checkAuth = () => {
+    if (!token) {
+      router.push('/login');
+    }
+  };
+  checkAuth();
+}, [token]);
+
+
+  const socialFormUpdatedToast = () =>
+    toast.success('Social Media Updated!', {
+      position: 'bottom-right',
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: false,
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
-      theme: 'dark',
+      theme: 'colored',
     });
+
   const router = useRouter();
   const params = router.query;
 
-  //const currentUserID = localStorage.getItem('user_id');
-  const [currentUser, setCurrentUser] = useState('');
 
-
-  useEffect(() => {
-    const currentUserID = localStorage.getItem('user_id');
-    if (currentUserID) {
-      setCurrentUser(currentUserID);
-    }
-  }, []);
 
   const [currentUserData, setCurrentUserData] = useState([]);
   const [currentUserError, setCurrentUserError] = useState(null);
@@ -72,8 +80,7 @@ function Dashboard() {
   const [reviewsReceived, setReviewsReceived] = useState([]);
   const [reviewsReceivedVisibility, setReviewsReceivedVisibility] =
     useState(true);
-  const [reviewsGivenVisibility, setReviewsGivenVisibility] =
-    useState(false);
+  const [reviewsGivenVisibility, setReviewsGivenVisibility] = useState(false);
   const [reviewsReceivedActive, setReviewsReceivedActive] = useState(true);
   const [reviewsGivenActive, setReviewsGivenActive] = useState(false);
   const handleReviewsReceivedVisibility = () => {
@@ -81,7 +88,7 @@ function Dashboard() {
     setReviewsGivenVisibility(false);
     setReviewsReceivedActive(true);
     setReviewsGivenActive(false);
-  }
+  };
   const handleReviewsGivenVisibility = () => {
     setReviewsReceivedVisibility(false);
     setReviewsGivenVisibility(true);
@@ -89,40 +96,43 @@ function Dashboard() {
     setReviewsGivenActive(true);
   };
 
+  // EDIT PROFILE: Social Media
+  const [socialFormLoading, setSocialFormLoading] = useState(false);
+  const [socialForm, setSocialForm] = useState({
+    youtube: '',
+    instagram: '',
+    soundcloud: '',
+    spotify: '',
+    user_id: user_id,
+  });
+  const handleSocialFormChange = (e) => {
+    setSocialForm({
+      ...socialForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleUpdateSocial = async (e) => {
+    e.preventDefault();
+    setSocialFormLoading(true);
+    try {
+      await axios.post(
+        'https://ratemytone.com/rmt_api_dashboard_update_social.php',
+        socialForm
+      );
 
+    } catch (err) {
+      alert('Something went wrong.');
+    }
+    setSocialFormLoading(false);
+    socialFormUpdatedToast();
+  };
 
-  // Profile Settings
-  const [userUsername, setUserUsername] = useState(
-    currentUserData.user_username
-  );
-  const [inputUserCity, setInputUserCity] = useState(currentUserData.user_city);
-  const [inputUserState, setInputUserState] = useState(
-    currentUserData.user_state
-  );
-  const [inputUserCountry, setInputUserCountry] = useState(
-    currentUserData.user_country
-  );
-  const [inputUserBio, setInputUserBio] = useState(currentUserData.user_bio);
-  const [inputUserAge, setInputUserAge] = useState(currentUserData.user_age);
   const [selectedGenres, setSelectedGenres] = useState(
     currentUserData.user_fav_genres
-  );
-  const [inputUserYoutube, setInputUserYoutube] = useState(
-    currentUserData.user_youtube
-  );
-  const [inputUserInsta, setInputUserInsta] = useState(
-    currentUserData.user_insta
-  );
-  const [inputUserSoundcloud, setInputUserSoundcloud] = useState(
-    currentUserData.user_soundcloud
-  );
-  const [inputUserSpotify, setInputUserSpotify] = useState(
-    currentUserData.user_spotify
   );
 
   const fetchFavTones = async () => {
     try {
-
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/music_list'
       );
@@ -136,9 +146,9 @@ function Dashboard() {
   const [userFavoriteIDs, setUserFavoriteIDs] = useState([]);
 
   const getUserFavorites = async () => {
-    const currentUser = localStorage.getItem('user_id');
+
     const response = await axios.get(
-      'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
+      'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
     );
     setUserFavoriteIDs(response.data.user_favorites);
     const userFavoritesString = userFavoriteIDs.join();
@@ -147,19 +157,17 @@ function Dashboard() {
         userFavoritesString
     );
     setUserFavorites(response2.data);
-  }
+  };
   useEffect(() => {
     getUserFavorites();
-  }, []);
+  }, [user_id]);
 
-
-
-  const fetchReviewsGiven= async () => {
+  const fetchReviewsGiven = async () => {
     try {
-      const currentUser = localStorage.getItem('user_id');
+
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/tone-review?reviewed_by=' +
-          currentUser
+          user_id
       );
       setReviewsGiven(response.data); // Axios data is in response.data
     } catch (err) {
@@ -168,10 +176,10 @@ function Dashboard() {
   };
   const fetchReviewsReceived = async () => {
     try {
-      const currentUser = localStorage.getItem('user_id');
+
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/tone-review?tone_author_id=' +
-          currentUser
+          user_id
       );
       setReviewsReceived(response.data); // Axios data is in response.data
     } catch (err) {
@@ -181,14 +189,13 @@ function Dashboard() {
 
   const fetchCurrentUserData = async () => {
     try {
-      const currentUser = localStorage.getItem('user_id');
+
       const response = await axios.get(
-        'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
+        'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
       );
       setCurrentUserData(response.data); // Axios data is in response.data
       setSelectedGenres(currentUserData.user_fav_genres);
       setCurrentUserLoading(false);
-      setInputUserYoutube(currentUserData.user_youtube);
     } catch (err) {
       setCurrentUserError(err);
       setCurrentUserLoading(false);
@@ -199,7 +206,8 @@ function Dashboard() {
     fetchFavTones();
     fetchReviewsGiven();
     fetchReviewsReceived();
-  }, []);
+
+  }, [user_id]);
 
   const genreList = [
     { label: 'Acoustic', value: 'Acoustic' },
@@ -222,41 +230,9 @@ function Dashboard() {
     { label: 'World', value: 'World' },
   ];
 
-  const handleUserYoutubeChange = (event) => {
-    setInputUserYoutube(event.target.value);
-  };
-  const handleUpdateUserSocial = (event) => {
-    event.preventDefault();
-    const currentUser = localStorage.getItem('user_id');
-    axios
-      .post(
-        'https://ratemytone.com/rmt_api_dashboard_social.php',
-        {
-          userYoutube: inputUserYoutube,
-          userInsta: inputUserInsta,
-          userSoundcloud: inputUserSoundcloud,
-          userSpotify: inputUserSpotify,
-          userID: currentUser,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-      .then(function (response) {
-        console.log(response.data);
-      })
-      .catch(function (error) {
-        console.error('Error submitting form:', error);
-      });
-    notify();
-  };
-
   if (currentUserLoading)
     return (
       <div id='page'>
-        <Header />
         <div className='flex flex-1 items-center justify-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
           <Audio
             height={100}
@@ -279,7 +255,7 @@ function Dashboard() {
 
   return (
     <div id='page'>
-      <Header />
+
       <ToastContainer />
       <div className='flex flex-1 flex-col items-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
         {/*Page Title*/}
@@ -519,7 +495,10 @@ function Dashboard() {
                   <div className=''>
                     <h3 className='text-white text-[18px]'>Social</h3>
                     <hr className='border-[#494949] mt-2' />
-                    <form className='mt-4 flex flex-col gap-5'>
+                    <form
+                      className='mt-4 flex flex-col gap-5'
+                      onSubmit={handleUpdateSocial}
+                    >
                       <div className='flex gap-[20px]'>
                         <div className='w-full'>
                           <label
@@ -530,10 +509,11 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={inputUserYoutube}
-                            // value={inputUserYoutube}
-                            onChange={handleUserYoutubeChange}
-                            className='rounded-xl w-full'
+                            name='youtube'
+                            placeholder={currentUserData.user_youtube}
+                            value={socialForm?.youtube}
+                            onChange={handleSocialFormChange}
+                            className='w-full border p-2 rounded'
                           />
                         </div>
                         <div className='w-full'>
@@ -545,10 +525,11 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
+                            name='instagram'
                             placeholder={currentUserData.user_instagram}
-                            value={currentUserData.user_instagram}
-                            onChange={(e) => setInputUserInsta(e.target.value)}
-                            className='rounded-xl w-full'
+                            value={socialForm?.instagram}
+                            onChange={handleSocialFormChange}
+                            className='w-full border p-2 rounded'
                           />
                         </div>
                       </div>
@@ -562,12 +543,11 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
-                            placeholder={currentUserData.user_soudcloud}
-                            value={currentUserData.user_soundcloud}
-                            onChange={(e) =>
-                              setInputUserSoundcloud(e.target.value)
-                            }
-                            className='rounded-xl w-full'
+                            name='soundcloud'
+                            placeholder={currentUserData.user_soundcloud}
+                            value={socialForm?.soundcloud}
+                            onChange={handleSocialFormChange}
+                            className='w-full border p-2 rounded'
                           />
                         </div>
                         <div className='w-full'>
@@ -579,24 +559,25 @@ function Dashboard() {
                           </label>
                           <input
                             type='text'
+                            name='spotify'
                             placeholder={currentUserData.user_spotify}
-                            value={currentUserData.user_spotify}
-                            onChange={(e) =>
-                              setInputUserSpotify(e.target.value)
-                            }
-                            className='rounded-xl w-full'
+                            value={socialForm?.spotify}
+                            onChange={handleSocialFormChange}
+                            className='w-full border p-2 rounded'
                           />
                         </div>
                       </div>
                       <div className='flex justify-end gap-[20px]'>
                         <button
+                          type='submit'
+                          disabled={socialFormLoading}
                           className='px-4 py-[5px] mt-2 text-white bg-[#53A870] rounded-full font-normal'
-                          onClick={handleUpdateUserSocial}
                         >
-                          Save Changes
+                          {socialFormLoading ? 'Updating...' : 'Update'}
                         </button>
                       </div>
                     </form>
+
                   </div>
                 </div>
               </div>
@@ -722,7 +703,15 @@ function Dashboard() {
                     </div>
                   </div>
                 ))}
-                {userFavorites.length === 0 && <p className='text-white'>You have no favorite tones yet. Head over to the <Link href='index.jsx' className='text-[#53A870] font-bold'>Tone Feed</Link> to start listening!</p>}
+                {userFavorites.length === 0 && (
+                  <p className='text-white'>
+                    You have no favorite tones yet. Head over to the{' '}
+                    <Link href='index.jsx' className='text-[#53A870] font-bold'>
+                      Tone Feed
+                    </Link>{' '}
+                    to start listening!
+                  </p>
+                )}
               </div>
             )}
 

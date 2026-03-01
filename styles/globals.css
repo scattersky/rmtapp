@@ -89,8 +89,16 @@ input{
 
 
 .Toastify__progress-bar{
-  background: #0CA771; /* green */
+  background: #fff; /* green */
 }
 .Toastify__toast-icon svg {
-  fill: #0CA771; /* indigo */
+  fill: #fff; /* indigo */
+}
+
+.Toastify__toast,
+.Toastify__toast-theme--colored,
+.Toastify__toast--success {
+  background: #0CA771 !important;
+  background-color: #0CA771 !important;
+  border-radius: 100px !important;
 }

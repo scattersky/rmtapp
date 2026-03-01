@@ -164,7 +164,7 @@ function SingleTone() {
   if (loading || authorLoading || reviewLoading || currentUserLoading)
     return (
       <div id='page'>
-        <Header />
+        
         <div className='flex flex-1 items-center justify-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
           <Audio
             height={100}
@@ -190,7 +190,7 @@ function SingleTone() {
 
   return (
     <div id='page'>
-      <Header />
+      
       <div className='flex flex-1 flex-col items-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
         {/*Page Title*/}
         <div className='flex flex-row justify-evenly items-center w-full p-[20px] border-b-[3px] border-white mb-3'>

@@ -2,10 +2,12 @@ import 'primereact/resources/themes/saga-green/theme.css';
 import 'primereact/resources/primereact.min.css';
 
 import '@/styles/globals.css';
+import Header from '@/components/Header';
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
+      <Header />
       <Component {...pageProps} />
     </>
   );

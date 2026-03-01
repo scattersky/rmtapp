@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import { useRouter } from 'next/router';
-
+import Cookies from 'js-cookie';
 
 const rmtLogo =
   'https://ratemytone.com/wp-content/uploads/2024/09/RMT-Logo-lg-1.png';
@@ -14,7 +14,8 @@ export default function Login() {
   const [loginFailure, setLoginFailure] = useState(false);
 
   const checkAuth = () => {
-    const token = localStorage.getItem('rmt_token');
+    const token = Cookies.get('rmt_token');
+
     if (token) {
       router.push('/');
     }
@@ -51,8 +52,14 @@ export default function Login() {
     axios
       .post(url, data, config)
       .then((response) => {
-        localStorage.setItem('rmt_token', response.data.token);
-        localStorage.setItem('user_id', response.data.user_id);
+        Cookies.set('rmt_token', response.data.token, {
+          expires: 7,
+        });
+        Cookies.set('user_id', response.data.user_id, {
+          expires: 7,
+        });
+        // localStorage.setItem('rmt_token', response.data.token);
+        // localStorage.setItem('user_id', response.data.user_id);
         console.log('Response Status:', response.status);
         console.log('Response Data:', response.data);
         checkAuth();

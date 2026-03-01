@@ -1,34 +1,36 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
 
 export default function Header() {
+  const token = Cookies.get('rmt_token');
+  const user_id = Cookies.get('user_id');
+
   const rmtLogo =
     'https://ratemytone.com/wp-content/uploads/2024/09/RMT-Logo-lg-1.png';
   const userAvatar = 'https://ratemytone.com/wp-content/uploads/2024/04/172724-1.jpg';
 
-  const [currentUser, setCurrentUser] = useState('');
+
+
   const [currentUserData, setCurrentUserData] = useState([]);
   const [currentUserError, setCurrentUserError] = useState(null);
 
   useEffect(() => {
     const fetchCurrentcurrentUserData = async () => {
       try {
-        const currentUserID = localStorage.getItem('user_id');
-
-        setCurrentUser(currentUserID);
         const response = await axios.get(
-          'https://ratemytone.com/wp-json/wp/v2/users/' + currentUserID
+          'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
         );
         setCurrentUserData(response.data); // Axios data is in response.data
-
       } catch (err) {
         setCurrentUserError(err);
         console.log(currentUserError);
       }
     };
     fetchCurrentcurrentUserData();
-  }, []);
+  }, [user_id]);
 
   return (
     <div

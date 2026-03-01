@@ -15,24 +15,28 @@ import { MdArrowDownward } from 'react-icons/md';
 import { MdArrowUpward } from 'react-icons/md';
 import { Tooltip } from 'react-tooltip'
 import { useRouter } from "next/router";
+import Cookies from 'js-cookie';
 
 
 export default function Home() {
   const router = useRouter();
+  // Get Cookie Data
+  const token = Cookies.get('rmt_token');
+  const user_id = Cookies.get('user_id');
+
+
   // Check Auth Status
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem('rmt_token');
       if (!token) {
         router.push('/login');
       }
     };
     const fetchCurrentUserData = async () => {
       try {
-        const currentUser = localStorage.getItem('user_id');
         const response = await axios.get(
-          'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
+          'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
         );
         setCurrentUserData(response.data); // Axios data is in response.data
         setCurrentUserLoading(false);
@@ -43,7 +47,7 @@ export default function Home() {
     };
     checkAuth();
     fetchCurrentUserData();
-  }, []);
+  }, [user_id, token]);
 
   const [currentUserData, setCurrentUserData] = useState([]);
   const [currentUserError, setCurrentUserError] = useState(null);
@@ -130,7 +134,7 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'https://ratemytone.com/wp-json/wp/v2/music_list'
+          'https://ratemytone.com/wp-json/wp/v2/music_list?posts_per_page=100'
         );
         setData(response.data); // Axios data is in response.data
         setFilteredData(response.data);
@@ -210,7 +214,7 @@ export default function Home() {
 
   const handleToneReviewSubmit = async (event) => {
     event.preventDefault();
-    const token = localStorage.getItem('rmt_token');
+
 
     if (!token) {
       console.error('No JWT token found. User not authenticated.');
@@ -262,19 +266,19 @@ export default function Home() {
   const [userFavorites, setUserFavorites] = useState([]);
 
   const getUserFavorites = async () => {
-    const currentUser = localStorage.getItem('user_id');
+
     const response = await axios.get(
-      'https://ratemytone.com/wp-json/wp/v2/users/' + currentUser
+      'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
     );
     setUserFavorites(response.data.user_favorites);
     console.log(userFavorites);
   }
   useEffect(() => {
     getUserFavorites();
-  }, []);
+  }, [user_id]);
 
   const handleAddToFavorites = async (postID) => {
-    const currentUser = localStorage.getItem('user_id');
+
     if (!userFavorites.includes(postID)) {
 
       const updatedFavorites = [...userFavorites, postID];
@@ -283,7 +287,7 @@ export default function Home() {
       try {
 
         await axios.post(
-          `https://ratemytone.com/wp-json/custom/v1/favorites/${currentUser}`,
+          `https://ratemytone.com/wp-json/custom/v1/favorites/${user_id}`,
           {
             favorites: updatedFavorites,
           }
@@ -297,7 +301,7 @@ export default function Home() {
       console.log(updatedFavorites);
       try {
         await axios.post(
-          `https://ratemytone.com/wp-json/custom/v1/favorites/${currentUser}`,
+          `https://ratemytone.com/wp-json/custom/v1/favorites/${user_id}`,
           {
             favorites: updatedFavorites,
           }
@@ -343,7 +347,7 @@ export default function Home() {
   if (loading || currentUserLoading)
     return (
       <div id='page'>
-        <Header />
+        
         <div className='flex flex-1 items-center justify-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
           <Audio
             height={100}
@@ -367,7 +371,7 @@ export default function Home() {
 
   return (
     <div id='page'>
-      <Header />
+      
       <div className='flex flex-1 flex-col items-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
         {/*Page Title*/}
         <div className='flex flex-row justify-center items-center w-full p-[20px] border-b-[3px] border-white mb-5'>
