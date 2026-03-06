@@ -3,14 +3,15 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
+import {useAuth} from "@/context/AuthContext";
+import RequireAuth from "@/components/RequireAuth";
 
 export default function Header() {
-  const token = Cookies.get('rmt_token');
-  const user_id = Cookies.get('user_id');
+  const { user_id } = useAuth();
 
   const rmtLogo =
     'https://ratemytone.com/wp-content/uploads/2024/09/RMT-Logo-lg-1.png';
-  const userAvatar = 'https://ratemytone.com/wp-content/uploads/2024/04/172724-1.jpg';
+
 
 
 
@@ -33,6 +34,7 @@ export default function Header() {
   }, [user_id]);
 
   return (
+    <RequireAuth>
     <div
       id='site_header'
       className='h=full min-h-[100px] w-full bg-[#000] flex items-center justify-center'
@@ -55,7 +57,7 @@ export default function Header() {
             </a>
             <Link
               href={{
-                pathname: '/',
+                pathname: '/tonefeed',
               }}
               className='cursor-pointer'
             >
@@ -103,5 +105,6 @@ export default function Header() {
         </div>
       </div>
     </div>
+    </RequireAuth>
   );
 }
