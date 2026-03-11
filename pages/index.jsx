@@ -2,18 +2,28 @@ import React, { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/router';
 import { useAuth } from '@/context/AuthContext';
+import axios from 'axios';
 
 const rmtLogo =
   'https://ratemytone.com/wp-content/uploads/2024/09/RMT-Logo-lg-1.png';
 
 
 export default function Index() {
-  const { login } = useAuth();
+  const { login, user_id, token } = useAuth();
   const router = useRouter();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (user_id) {
+      router.push('/tonefeed');
+    }
+    if (token) {
+      router.push('/tonefeed');
+    }
+  }, [user_id, token, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

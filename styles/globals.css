@@ -100,5 +100,5 @@ input{
 .Toastify__toast--success {
   background: #0CA771 !important;
   background-color: #0CA771 !important;
-  border-radius: 100px !important;
+  border-radius:5px !important;
 }

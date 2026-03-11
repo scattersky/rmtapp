@@ -21,13 +21,16 @@ import Header from "@/components/Header";
 
 
 export default function Home() {
-  const { user_id, token } = useAuth();
+  const { user_id, token, loading: authLoading } = useAuth();
   const router = useRouter();
 
 
 
   useEffect(() => {
-
+    if (!user_id) {
+      setCurrentUserLoading(false);
+      return;
+    }
     const fetchCurrentUserData = async () => {
       try {
         const response = await axios.get(
@@ -140,7 +143,7 @@ export default function Home() {
       }
     };
     fetchData();
-  }, []); // The empty dependency array ensures this runs only once on mount
+  }, []);
 
 
 
@@ -261,7 +264,10 @@ export default function Home() {
   const [userFavorites, setUserFavorites] = useState([]);
 
   const getUserFavorites = async () => {
-
+    if (!user_id) {
+      setCurrentUserLoading(false);
+      return;
+    }
     const response = await axios.get(
       'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
     );
@@ -307,39 +313,8 @@ export default function Home() {
     }
   };
 
-  // const isUserFav = (postID) => {
-  //   if (userFavorites.includes(postID)) {
-  //     return (
-  //       <div className='flex flex-row gap-1 items-center justify-center text-[25px] text-white cursor-pointer'>
-  //         <MdFavorite
-  //           data-tooltip-id='fav-tooltip'
-  //           data-tooltip-content='Favorited'
-  //           color='#b50000'
-  //         />
-  //         <span className='text-[20px]'>3</span>
-  //         <Tooltip id='fav-tooltip' />
-  //       </div>
-  //     );
-  //   } else {
-  //     return (
-  //       <div className='flex flex-row gap-1 items-center justify-center text-[25px] text-white cursor-pointer'>
-  //         <MdFavorite
-  //           data-tooltip-id='fav-tooltip'
-  //           data-tooltip-content='Favorite'
-  //           color='#b7b7b7'
-  //           onClick={handleAddToFavorites(postID)}
-  //         />
-  //         <span className='text-[20px]'>3</span>
-  //         <Tooltip id='fav-tooltip' />
-  //       </div>
-  //     );
-  //   }
-  //
-  // }
 
-
-
-  if (loading || currentUserLoading)
+  if (loading || currentUserLoading || authLoading)
     return (
       <div id='page'>
 
@@ -585,13 +560,6 @@ export default function Home() {
                       </Link>
                       <div className='flex flex-row gap-6 items-center md:justify-start'>
                         <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
-                          {/*<MdFavorite*/}
-                          {/*  data-tooltip-id='fav-tooltip'*/}
-                          {/*  data-tooltip-content='Favorite'*/}
-                          {/*/>*/}
-                          {/*3*/}
-                          {/*<Tooltip id='fav-tooltip' />*/}
-                          {/*{isUserFav(post.id)}*/}
                           <div
                             className='flex flex-row gap-1 items-center text-[20px] text-white cursor-pointer'
                             onClick={() => handleAddToFavorites(post.id)}
@@ -611,7 +579,7 @@ export default function Home() {
                             data-tooltip-id='rate-tooltip'
                             data-tooltip-content='Rate My Tone'
                           />
-                          12
+                          {post.review_count}
                           <Tooltip id='rate-tooltip' />
                         </div>
                         <ReactStars

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import axios from 'axios';
 import { Audio } from 'react-loader-spinner';
-
+import { ThreeDots } from 'react-loader-spinner';
 import Header from '@/components/Header';
 import { MultiSelect } from 'primereact/multiselect';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -12,7 +12,7 @@ import CountrySelector from '@/components/CountrySelect';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import {AudioPlayer} from "react-audio-play";
-import { MdFavorite, MdModeComment } from 'react-icons/md';
+import { MdFavorite, MdFavoriteBorder, MdModeComment } from 'react-icons/md';
 import {Tooltip} from "react-tooltip";
 import ReactStars from "react-rating-stars-component";
 
@@ -21,6 +21,8 @@ import moment from 'moment';
 import Cookies from 'js-cookie';
 import { useAuth } from '@/context/AuthContext';
 import RequireAuth from '@/components/RequireAuth';
+import { Button } from '@mui/material';
+import { replaceProfanities } from 'no-profanity';
 
 function Dashboard() {
   const { user_id } = useAuth();
@@ -51,6 +53,17 @@ function Dashboard() {
     });
   const aboutFormUpdatedToast = () =>
     toast.success('Basic Info Updated!', {
+      position: 'bottom-right',
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: 'colored',
+    });
+  const replyFormUpdatedToast = () =>
+    toast.success('Reply Posted!', {
       position: 'bottom-right',
       autoClose: 3000,
       hideProgressBar: false,
@@ -109,7 +122,8 @@ function Dashboard() {
     setReviewsReceivedActive(false);
     setReviewsGivenActive(true);
   };
-
+  const [reviewReplyVisibility, setReviewReplyVisibility] = useState(false);
+  const [activeReplyReviewId, setActiveReplyReviewId] = useState(null);
 
   // EDIT PROFILE: Social Media
   const [basicInfoFormLoading, setBasicInfoFormLoading] = useState(false);
@@ -166,12 +180,40 @@ function Dashboard() {
         'https://ratemytone.com/rmt_api_dashboard_update_social.php',
         socialForm
       );
-
     } catch (err) {
       alert('Something went wrong.');
     }
     setSocialFormLoading(false);
     socialFormUpdatedToast();
+  };
+
+  const [replyFormLoading, setReplyFormLoading] = useState(false);
+  const [replyForm, setReplyForm] = useState({
+    review_id: null,
+    reply: '',
+    user_id: user_id,
+  });
+  const handleReplyFormChange = (e) => {
+    setReplyForm({
+      ...replyForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleUpdateReply= async (e) => {
+    e.preventDefault();
+    setReplyFormLoading(true);
+    try {
+      await axios.post(
+        'https://ratemytone.com/rmt_api_tone_review_reply.php',
+        replyForm
+      );
+    } catch (err) {
+      alert('Something went wrong.');
+    }
+    setReplyFormLoading(false);
+    setActiveReplyReviewId(false);
+    await fetchReviewsReceived();
+    replyFormUpdatedToast();
   };
 
   // EDIT PROFILE: About
@@ -182,7 +224,7 @@ function Dashboard() {
     user_id: user_id,
   });
   const handleAboutFormChange = (e) => {
-    setSocialForm({
+    setAboutForm({
       ...aboutForm,
       [e.target.name]: e.target.value,
     });
@@ -224,20 +266,35 @@ function Dashboard() {
 
   const getUserFavorites = async () => {
     if (!user_id) return;
+
     const response = await axios.get(
       'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
     );
-    setUserFavoriteIDs(response.data.user_favorites);
-    const userFavoritesString = userFavoriteIDs.join();
+
+    let favIDs = response.data.user_favorites || {};
+
+    // Convert object values to array
+    favIDs = Object.values(favIDs); // [1, 7747]
+
+    setUserFavoriteIDs(favIDs);
+
+    if (favIDs.length === 0) {
+      setUserFavorites([]);
+      return;
+    }
+
+    const userFavoritesString = favIDs.join(',');
+
     const response2 = await axios.get(
       'https://ratemytone.com/wp-json/wp/v2/music_list?include=' +
         userFavoritesString
     );
+
     setUserFavorites(response2.data);
   };
   useEffect(() => {
     getUserFavorites();
-  }, [user_id, getUserFavorites]);
+  }, [user_id]);
 
   const fetchReviewsGiven = async () => {
     if (!user_id) return;
@@ -309,6 +366,38 @@ function Dashboard() {
     { label: 'Rock', value: 'Rock' },
     { label: 'World', value: 'World' },
   ];
+
+  const handleAddToFavorites = async (postID) => {
+    if (!userFavorites.includes(postID)) {
+      const updatedFavorites = [...userFavorites, postID];
+      setUserFavorites(updatedFavorites);
+      console.log(updatedFavorites);
+      try {
+        await axios.post(
+          `https://ratemytone.com/wp-json/custom/v1/favorites/${user_id}`,
+          {
+            favorites: updatedFavorites,
+          }
+        );
+      } catch (error) {
+        console.error('Error Updating Favorites:', error.response.data.message);
+      }
+    } else {
+      const updatedFavorites = userFavorites.filter((id) => id !== postID);
+      setUserFavorites(updatedFavorites);
+      console.log(updatedFavorites);
+      try {
+        await axios.post(
+          `https://ratemytone.com/wp-json/custom/v1/favorites/${user_id}`,
+          {
+            favorites: updatedFavorites,
+          }
+        );
+      } catch (error) {
+        console.error('Error Updating Favorites:', error.response.data.message);
+      }
+    }
+  };
 
   if (currentUserLoading)
     return (
@@ -680,123 +769,133 @@ function Dashboard() {
                 <div className='music_list_item p-[20px] flex flex-col gap-5'>
                   <h2 className='text-white text-[22px]'>Favorites</h2>
 
-                  {userFavorites.map((post) => (
-                    <div
-                      key={post.id}
-                      className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'
-                    >
-                      {/*Music List Card Upper*/}
-                      <div className='w-full flex flex-col md:flex-row gap-4'>
-                        <img
-                          src={post.featured_media_src_url}
-                          className='w-full md:max-w-[250px] rounded-xl'
-                          alt='Tone Image'
-                        />
-                        <div className='flex flex-col gap-2 w-full justify-between'>
-                          <div className='flex flex-row gap-2 w-full justify-end flex-wrap'>
-                            {post.genres.map((genre) => (
-                              <div
-                                key={genre.id}
-                                className='text-white bg-[#8E8E8E] text-[16px] px-3 py-1 rounded-full'
-                              >
-                                {genre}
+                  {Array.isArray(userFavorites) &&
+                    userFavorites.map((post) => {
+                      const isFav = userFavorites.includes(post.id);
+                      return (
+                        <div
+                          key={post.id}
+                          className='music_list_item p-[20px] flex flex-col gap-5 rounded-3xl mb-[40px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'
+                        >
+                          {/*Music List Card Upper*/}
+                          <div className='w-full flex flex-col md:flex-row gap-4'>
+                            <img
+                              src={post.featured_media_src_url}
+                              className='w-full md:max-w-[250px] rounded-xl'
+                              alt='Tone Image'
+                            />
+                            <div className='flex flex-col gap-2 w-full justify-between'>
+                              <div className='flex flex-row gap-2 w-full justify-end flex-wrap'>
+                                {post.genres.map((genre) => (
+                                  <div
+                                    key={genre.id}
+                                    className='text-white bg-[#8E8E8E] text-[16px] px-3 py-1 rounded-full'
+                                  >
+                                    {genre}
+                                  </div>
+                                ))}
+                                {post.instruments.map((instrument) => (
+                                  <div
+                                    key={instrument.id}
+                                    className='text-white bg-[#53A870] text-[16px] px-3 py-1 rounded-full'
+                                  >
+                                    {instrument}
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                            {post.instruments.map((instrument) => (
-                              <div
-                                key={instrument.id}
-                                className='text-white bg-[#53A870] text-[16px] px-3 py-1 rounded-full'
-                              >
-                                {instrument}
+                              <div className='flex flex-col gap-1 w-full'>
+                                <Link
+                                  href={{
+                                    pathname: '/profile',
+                                    query: {
+                                      id: post.author,
+                                      name: post.author_name,
+                                    },
+                                  }}
+                                  className='cursor-pointer'
+                                >
+                                  <div className='flex flex-row gap-2 items-center cursor-pointer text-[#53A870] text-[18px]'>
+                                    <img
+                                      src={post.author_image_url}
+                                      className='h-[35px] w-[35px] rounded-full ml-1'
+                                    />
+                                    @{post.author_name}
+                                  </div>
+                                </Link>
+                                <h3 className='text-white text-[26px] ml-1 mb-1'>
+                                  {post.title.rendered}
+                                </h3>
+                                <div className='min-w-[100%] w-[100%] rounded-full overflow-hidden'>
+                                  <AudioPlayer
+                                    src={post.acf.music_url}
+                                    className=''
+                                    backgroundColor='#272727'
+                                    width='100%'
+                                    sliderColor='#53A870'
+                                  />
+                                </div>
                               </div>
-                            ))}
+                            </div>
                           </div>
-                          <div className='flex flex-col gap-1 w-full'>
+
+                          {/*Music List Card Middle*/}
+                          <div className='w-full flex flex-1'>
+                            <p className='text-white'>
+                              {post.plain_text_excerpt}
+                            </p>
+                          </div>
+
+                          {/*Music List Card Lower*/}
+                          <div className='w-full flex flex-col-reverse md:flex-row gap-4 justify-between'>
                             <Link
                               href={{
-                                pathname: '/profile',
+                                pathname: '/singletone',
                                 query: {
-                                  id: post.author,
-                                  name: post.author_name,
+                                  id: post.id,
+                                  title: post.title.rendered,
+                                  author: post.author,
+                                  author_name: post.author_name,
                                 },
                               }}
-                              className='cursor-pointer'
                             >
-                              <div className='flex flex-row gap-2 items-center cursor-pointer text-[#53A870] text-[18px]'>
-                                <img
-                                  src={post.author_image_url}
-                                  className='h-[35px] w-[35px] rounded-full ml-1'
-                                />
-                                @{post.author_name}
+                              <div className='py-2 px-[60px] text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
+                                Tone Notes
                               </div>
                             </Link>
-                            <h3 className='text-white text-[26px] ml-1 mb-1'>
-                              {post.title.rendered}
-                            </h3>
-                            <div className='min-w-[100%] w-[100%] rounded-full overflow-hidden'>
-                              <AudioPlayer
-                                src={post.acf.music_url}
-                                className=''
-                                backgroundColor='#272727'
-                                width='100%'
-                                sliderColor='#53A870'
+                            <div className='flex flex-row gap-6 items-center md:justify-start'>
+                              <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
+                                <div
+                                  className='flex flex-row gap-1 items-center text-[20px] text-white cursor-pointer'
+                                  onClick={() => handleAddToFavorites(post.id)}
+                                >
+                                  {isFav ? (
+                                    <MdFavorite color='red' />
+                                  ) : (
+                                    <MdFavoriteBorder />
+                                  )}
+                                </div>
+                              </div>
+                              <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
+                                <MdModeComment
+                                  data-tooltip-id='rate-tooltip'
+                                  data-tooltip-content='Rate My Tone'
+                                />
+                                12
+                                <Tooltip id='rate-tooltip' />
+                              </div>
+                              <ReactStars
+                                edit={false}
+                                count={5}
+                                value={post.average_rating}
+                                size={25}
+                                activeColor='#ffd700'
+                                className='ml-auto'
                               />
                             </div>
                           </div>
                         </div>
-                      </div>
-
-                      {/*Music List Card Middle*/}
-                      <div className='w-full flex flex-1'>
-                        <p className='text-white'>{post.plain_text_excerpt}</p>
-                      </div>
-
-                      {/*Music List Card Lower*/}
-                      <div className='w-full flex flex-col-reverse md:flex-row gap-4 justify-between'>
-                        <Link
-                          href={{
-                            pathname: '/singletone',
-                            query: {
-                              id: post.id,
-                              title: post.title.rendered,
-                              author: post.author,
-                              author_name: post.author_name,
-                            },
-                          }}
-                        >
-                          <div className='py-2 px-[60px] text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
-                            Tone Notes
-                          </div>
-                        </Link>
-                        <div className='flex flex-row gap-6 items-center md:justify-start'>
-                          <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
-                            <MdFavorite
-                              data-tooltip-id='fav-tooltip'
-                              data-tooltip-content='Favorite'
-                            />
-                            3
-                            <Tooltip id='fav-tooltip' />
-                          </div>
-                          <div className='flex flex-row gap-1 items-center justify-center text-[20px] text-white cursor-pointer'>
-                            <MdModeComment
-                              data-tooltip-id='rate-tooltip'
-                              data-tooltip-content='Rate My Tone'
-                            />
-                            12
-                            <Tooltip id='rate-tooltip' />
-                          </div>
-                          <ReactStars
-                            edit={false}
-                            count={5}
-                            value={post.average_rating}
-                            size={25}
-                            activeColor='#ffd700'
-                            className='ml-auto'
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
                   {userFavorites.length === 0 && (
                     <p className='text-white'>
                       You have no favorite tones yet. Head over to the{' '}
@@ -870,24 +969,106 @@ function Dashboard() {
                             <h4 className='text-white text-[24px]'>
                               {review.title.rendered}
                             </h4>
-                            <Link
-                              href={{
-                                pathname: '/singletone',
-                                query: {
-                                  id: review.id,
-                                  title: review.title.rendered,
-                                },
-                              }}
-                            >
-                              <div className='py-1 px-[45px] text-[13px] mt-3 text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
-                                View Tone
-                              </div>
-                            </Link>
+
+                            <div className='flex flex-row gap-2 items-center justify-end'>
+                              <Link
+                                href={{
+                                  pathname: '/singletone',
+                                  query: {
+                                    id: review.id,
+                                    title: review.title.rendered,
+                                  },
+                                }}
+                              >
+                                <div className='py-1 px-[45px] text-[13px] mt-3 text-white text-center bg-none border-white border-[2px] rounded-full inline-block cursor-pointer'>
+                                  View Tone
+                                </div>
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  setActiveReplyReviewId(review.id);
+                                  setReplyForm((prev) => ({
+                                    ...prev,
+                                    review_id: review.id,
+                                  }));
+                                }}
+                                className='py-1 px-[45px] text-[13px] mt-3 text-[#53A870] text-center bg-none border-[#53A870] border-[2px] rounded-full inline-block cursor-pointer'
+                              >
+                                {review.review_reply !== ''
+                                  ? 'Edit Reply'
+                                  : 'Reply'}
+                              </button>
+                            </div>
                           </div>
 
                           <p className='text-white'>
                             {review.acf.tone_review_text}
                           </p>
+                          {review.review_reply !== '' && (
+                            <div className='border-gray-500 border-t p-4 mt-2'>
+                              <h4 className='text-sm text-white mb-1'>
+                                Your Reply
+                              </h4>
+                              <span className='text-white text-[10px] uppercase tracking-[1px]'>
+                                {moment(review.review_reply_date).format(
+                                  'MMMM Do YYYY'
+                                )}
+                              </span>
+                              <p className='text-xs text-white'>
+                                {replaceProfanities(review.review_reply)}
+                              </p>
+                            </div>
+                          )}
+                          <div className='flexr'>
+                            {activeReplyReviewId === review.id && (
+                              <form
+                                className='mt-4 flex flex-col gap-5'
+                                onSubmit={handleUpdateReply}
+                              >
+                                <div className='w-full'>
+                                  <label
+                                    className='text-white p-1 mb-1 block'
+                                    htmlFor='age'
+                                  >
+                                    Your Reply
+                                  </label>
+                                  <input
+                                    type='text'
+                                    name='reply'
+                                    placeholder=''
+                                    value={replyForm?.reply}
+                                    onChange={handleReplyFormChange}
+                                    className='w-full border py-2 px-4 rounded-full'
+                                  />
+
+                                  <button
+                                    type='submit'
+                                    disabled={replyFormLoading}
+                                    className='w-full flex justify-end p-0'
+                                  >
+                                    <div className='cursor-pointer font-normal bg-[#53A870] text-[15px] px-4 py-2 min-w-[140px] rounded-full ml-auto mr-0 mt-2 text-center flex justify-center items-center'>
+                                      {replyFormLoading ? (
+                                        <ThreeDots
+                                          height='20'
+                                          width='20'
+                                          radius='9'
+                                          color='#fff'
+                                          ariaLabel='three-dots-loading'
+                                          wrapperStyle={{ margin: '0px' }}
+                                          wrapperClass='custom-loader'
+                                          visible={true}
+                                        />
+                                      ) : (
+                                        <span className='font-normal text-sm text-white'>
+                                          Submit Reply
+                                        </span>
+                                      )}
+                                    </div>
+                                  </button>
+                                </div>
+                              </form>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>

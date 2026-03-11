@@ -27,10 +27,15 @@ export const AuthProvider = ({ children }) => {
     if (typeof window === 'undefined') return;
 
     const storedToken = localStorage.getItem('token');
+    const storedUserID = localStorage.getItem('user_id');
 
     if (storedToken) {
       setToken(storedToken);
       setAuthHeader(storedToken);
+    }
+
+    if (storedUserID) {
+      setUser(storedUserID);
     }
 
     setLoading(false);
@@ -48,6 +53,7 @@ export const AuthProvider = ({ children }) => {
 
       if (token) {
         localStorage.setItem('token', token);
+        localStorage.setItem('user_id', user_id);
         setToken(token);
         setUser(user_id);
         setAuthHeader(token);
@@ -64,6 +70,7 @@ export const AuthProvider = ({ children }) => {
   // 🚪 LOGOUT
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     setToken(null);
     setUser(null);
     setAuthHeader(null);

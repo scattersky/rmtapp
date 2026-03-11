@@ -20,6 +20,7 @@
     "moment": "^2.30.1",
     "next": "^11.1.4",
     "next-navigation": "^1.0.6",
+    "no-profanity": "^1.5.1",
     "postcss": "^8.4.6",
     "primereact": "^10.9.7",
     "react": "^17.0.2",
