@@ -79,7 +79,7 @@ export default function Header() {
               Contact
             </a>
             <a
-              href='#'
+              href='/upload'
               className='block text-white uppercase text-[16px] hover:text-[#3FE297]'
             >
               Upload
