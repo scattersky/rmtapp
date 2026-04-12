@@ -95,8 +95,7 @@ input{
   fill: #fff; /* indigo */
 }
 
-.Toastify__toast,
-.Toastify__toast-theme--colored,
+
 .Toastify__toast--success {
   background: #0CA771 !important;
   background-color: #0CA771 !important;

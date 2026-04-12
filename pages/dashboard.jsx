@@ -15,6 +15,12 @@ import {AudioPlayer} from "react-audio-play";
 import { MdFavorite, MdFavoriteBorder, MdModeComment } from 'react-icons/md';
 import {Tooltip} from "react-tooltip";
 import ReactStars from "react-rating-stars-component";
+import { FaYoutube } from 'react-icons/fa6';
+import { FaSquareInstagram } from 'react-icons/fa6';
+import { FaSoundcloud } from 'react-icons/fa6';
+import { FaSpotify } from 'react-icons/fa6';
+import { FaCircleInfo } from 'react-icons/fa6';
+
 
 import moment from 'moment';
 
@@ -40,17 +46,8 @@ function Dashboard() {
       progress: undefined,
       theme: 'colored',
     });
-  const basicInfoFormUpdatedToast = () =>
-    toast.success('Basic Info Updated!', {
-      position: 'bottom-right',
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'colored',
-    });
+
+
   const aboutFormUpdatedToast = () =>
     toast.success('Basic Info Updated!', {
       position: 'bottom-right',
@@ -145,15 +142,39 @@ function Dashboard() {
     e.preventDefault();
     setBasicInfoFormLoading(true);
     try {
+
+      const config = {
+        headers: { 'Content-Type': 'application/json' },
+      };
       await axios.post(
         'https://ratemytone.com/rmt_api_dashboard_update_basic_info.php',
-        basicInfoForm
+        basicInfoForm,
+        config
       );
+      toast.success('Basic Info Updated!', {
+        position: 'bottom-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+      });
     } catch (err) {
-      alert('Something went wrong.');
+      toast.error('Something went wrong.', {
+        position: 'bottom-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'colored',
+      });
     }
     setBasicInfoFormLoading(false);
-    basicInfoFormUpdatedToast();
+
   };
 
 
@@ -324,14 +345,21 @@ function Dashboard() {
   };
 
   const fetchCurrentUserData = async () => {
-    if (!user_id) return;
+    if (!user_id){
+      setCurrentUserLoading(false);
+      return;
+    }
     try {
 
       const response = await axios.get(
         'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
       );
       setCurrentUserData(response.data); // Axios data is in response.data
-      setSelectedGenres(response.data.user_fav_genres);
+      setAboutForm((prev) => ({
+        ...prev,
+        user_fav_genres: response.data.user_fav_genres || [],
+        user_id: user_id
+      }));
       setCurrentUserLoading(false);
     } catch (err) {
       setCurrentUserError(err);
@@ -346,26 +374,28 @@ function Dashboard() {
 
   }, [user_id]);
 
-  const genreList = [
-    { label: 'Acoustic', value: 'Acoustic' },
-    { label: 'Bluegrass', value: 'Bluegrass' },
-    { label: 'Blues', value: 'Blues' },
-    { label: 'Country', value: 'Country' },
-    { label: 'Electronic', value: 'Electronic' },
-    { label: 'Experimental', value: 'Experimental' },
-    { label: 'Funk', value: 'Funk' },
-    { label: 'Hip Hop', value: 'Hip Hop' },
-    { label: 'Jazz', value: 'Jazz' },
-    { label: 'Latin', value: 'Latin' },
-    { label: 'Metal', value: 'Metal' },
-    { label: 'Other', value: 'Other' },
-    { label: 'Pop', value: 'Pop' },
-    { label: 'Psychedelic', value: 'Psychedelic' },
-    { label: 'R&B / Soul', value: 'R&B / Soul' },
-    { label: 'Reggae', value: 'Reggae' },
-    { label: 'Rock', value: 'Rock' },
-    { label: 'World', value: 'World' },
-  ];
+  const [genreList, setGenreList] = useState([]);
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const res = await axios.get(
+          'https://ratemytone.com/wp-json/wp/v2/music_list_genre'
+        );
+
+        // 🔥 Transform API response
+        const formatted = res.data.map((term) => ({
+          label: term.name, // what shows in UI
+          value: term.id, // what gets stored
+        }));
+
+        setGenreList(formatted);
+      } catch (err) {
+        console.error('Error fetching genres:', err);
+      }
+    };
+
+    fetchGenres();
+  }, []);
 
   const handleAddToFavorites = async (postID) => {
     if (!userFavorites.includes(postID)) {
@@ -379,6 +409,16 @@ function Dashboard() {
             favorites: updatedFavorites,
           }
         );
+        toast.success('Tone Added To Favorites!', {
+          position: 'bottom-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'colored',
+        });
       } catch (error) {
         console.error('Error Updating Favorites:', error.response.data.message);
       }
@@ -393,6 +433,16 @@ function Dashboard() {
             favorites: updatedFavorites,
           }
         );
+        toast.error('Tone Removed From Favorites.', {
+          position: 'bottom-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'colored',
+        });
       } catch (error) {
         console.error('Error Updating Favorites:', error.response.data.message);
       }
@@ -511,7 +561,7 @@ function Dashboard() {
             <div className='w-[80%] p-6'>
               {settingsVisible && (
                 <div className='music_list_item p-[20px] flex flex-col gap-5'>
-                  <h2 className='text-white text-[22px]'>Profile Settings</h2>
+                  <h2 className='text-white text-[30px]'>Profile Settings</h2>
                   <div className='music_list_item px-[20px] pt-[20px] pb-[30px] flex flex-col gap-5 rounded-3xl mb-[10px] shadowwhite border-[1px] border-[rgba(255,255,255,0.3)]'>
                     <div className=''>
                       <h3 className='text-white text-[18px]'>Basic Info</h3>
@@ -633,29 +683,35 @@ function Dashboard() {
                               Favorite Genres
                             </label>
                             <MultiSelect
-                              value={aboutForm?.user_fav_genres}
-                              onChange={handleAboutFormChange}
+                              value={aboutForm.user_fav_genres}
+                              onChange={(e) =>
+                                setAboutForm((prev) => ({
+                                  ...prev,
+                                  user_fav_genres: e.value,
+                                }))
+                              }
                               options={genreList}
                               optionLabel='label'
-                              name='user_fav_genres'
                               display='chip'
-                              placeholder={
-                                selectedGenres
-                                  ? selectedGenres
-                                  : 'Please select up to 3 genres...'
-                              }
+                              placeholder='Please select up to 3 genres...'
                               maxSelectedLabels={3}
                               className='w-full md:w-20rem'
                             />
+
                           </div>
                         </div>
                         <div className='flex gap-[20px]'>
                           <div className='w-full'>
                             <label
-                              className='text-white p-1 mb-1 block'
+                              className='text-white p-1 mb-1 gap-2 flex items-center'
                               htmlFor='username'
                             >
                               Bio
+                              <FaCircleInfo
+                                data-tooltip-id='bio-tooltip'
+                                data-tooltip-content='One sentence about yourself.'
+                              />
+                              <Tooltip id='bio-tooltip' />
                             </label>
                             <input
                               type='text'
@@ -686,9 +742,10 @@ function Dashboard() {
                         <div className='flex gap-[20px]'>
                           <div className='w-full'>
                             <label
-                              className='text-white p-1 mb-1 block'
-                              htmlFor='username'
+                              className='text-white p-1 mb-1 flex items-center gap-2'
+                              htmlFor='youtube'
                             >
+                              <FaYoutube className='text-lg text-white' />
                               YouTube
                             </label>
                             <input
@@ -702,9 +759,10 @@ function Dashboard() {
                           </div>
                           <div className='w-full'>
                             <label
-                              className='text-white p-1 mb-1 block'
-                              htmlFor='age'
+                              className='text-white p-1 mb-1 flex items-center gap-2'
+                              htmlFor='instagram'
                             >
+                              <FaSquareInstagram className='text-lg text-white' />
                               Instagram
                             </label>
                             <input
@@ -720,9 +778,10 @@ function Dashboard() {
                         <div className='flex gap-[20px]'>
                           <div className='w-full'>
                             <label
-                              className='text-white p-1 mb-1 block'
-                              htmlFor='username'
+                              className='text-white p-1 mb-1 flex items-center gap-2'
+                              htmlFor='soundcloud'
                             >
+                              <FaSoundcloud className='text-lg text-white' />
                               SoundCloud
                             </label>
                             <input
@@ -736,9 +795,10 @@ function Dashboard() {
                           </div>
                           <div className='w-full'>
                             <label
-                              className='text-white p-1 mb-1 block'
-                              htmlFor='age'
+                              className='text-white p-1 mb-1 flex items-center gap-2'
+                              htmlFor='spotify'
                             >
+                              <FaSpotify className='text-lg text-white' />
                               Spotify
                             </label>
                             <input
@@ -767,7 +827,7 @@ function Dashboard() {
               )}
               {favoritesVisible && (
                 <div className='music_list_item p-[20px] flex flex-col gap-5'>
-                  <h2 className='text-white text-[22px]'>Favorites</h2>
+                  <h2 className='text-white text-[30px]'>Favorites</h2>
 
                   {Array.isArray(userFavorites) &&
                     userFavorites.map((post) => {

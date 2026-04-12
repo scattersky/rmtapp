@@ -3,9 +3,8 @@
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/router';
 import Header from '@/components/Header';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import RequireAuth from '@/components/RequireAuth';
-import { toast, ToastContainer } from 'react-toastify';
 import { FileUpload } from 'primereact/fileupload';
 import { ProgressBar } from 'primereact/progressbar';
 import axios from 'axios';
@@ -25,48 +24,54 @@ export default function Upload() {
   const [audioURL, setAudioURL] = useState('');
   const [imageURL, setImageURL] = useState('');
   const [imageAttachmentId, setImageAttachmentId] = useState(null);
-  const genreList = [
-    { label: 'Acoustic', value: 'Acoustic' },
-    { label: 'Bluegrass', value: 'Bluegrass' },
-    { label: 'Blues', value: 'Blues' },
-    { label: 'Country', value: 'Country' },
-    { label: 'Electronic', value: 'Electronic' },
-    { label: 'Experimental', value: 'Experimental' },
-    { label: 'Funk', value: 'Funk' },
-    { label: 'Hip Hop', value: 'Hip Hop' },
-    { label: 'Jazz', value: 'Jazz' },
-    { label: 'Latin', value: 'Latin' },
-    { label: 'Metal', value: 'Metal' },
-    { label: 'Other', value: 'Other' },
-    { label: 'Pop', value: 'Pop' },
-    { label: 'Psychedelic', value: 'Psychedelic' },
-    { label: 'R&B / Soul', value: 'R&B / Soul' },
-    { label: 'Reggae', value: 'Reggae' },
-    { label: 'Rock', value: 'Rock' },
-    { label: 'World', value: 'World' },
-  ];
+  const [genreList, setGenreList] = useState([]);
+  const [instrumentList, setInstrumentList] = useState([]);
 
-  const instrumentList = [
-    { label: 'Accordion', value: 'Accordion' },
-    { label: 'Banjo', value: 'Banjo' },
-    { label: 'Bass', value: 'Bass' },
-    { label: 'Cello', value: 'Cello' },
-    { label: 'Drum Machine', value: 'Drum Machine' },
-    { label: 'Drums', value: 'Drums' },
-    { label: 'Guitar', value: 'Guitar' },
-    { label: 'Harp', value: 'Harp' },
-    { label: 'Brass', value: 'Brass' },
-    { label: 'Woodwind', value: 'Woodwind' },
-    { label: 'Keyboard', value: 'Keyboard' },
-    { label: 'Organ', value: 'Organ' },
-    { label: 'Other', value: 'Other' },
-    { label: 'Percussion', value: 'Percussion' },
-    { label: 'Piano', value: 'Piano' },
-    { label: 'Sampler', value: 'Sampler' },
-    { label: 'Synth', value: 'Synth' },
-    { label: 'Violin', value: 'Violin' },
-    { label: 'Vocal', value: 'Vocal' },
-  ];
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const res = await axios.get(
+          'https://ratemytone.com/wp-json/wp/v2/music_list_genre'
+        );
+
+        // 🔥 Transform API response
+        const formatted = res.data.map((term) => ({
+          label: term.name, // what shows in UI
+          value: term.id, // what gets stored
+        }));
+
+        setGenreList(formatted);
+      } catch (err) {
+        console.error('Error fetching genres:', err);
+      }
+    };
+
+    fetchGenres();
+  }, []);
+
+  useEffect(() => {
+    const fetchInstruments = async () => {
+      try {
+        const res = await axios.get(
+          'https://ratemytone.com/wp-json/wp/v2/music_list_instrument'
+        );
+
+        // 🔥 Transform API response
+        const formatted = res.data.map((term) => ({
+          label: term.name, // what shows in UI
+          value: term.id, // what gets stored
+        }));
+
+        setInstrumentList(formatted);
+      } catch (err) {
+        console.error('Error fetching instruments:', err);
+      }
+    };
+
+    fetchInstruments();
+  }, []);
+
+
 
   const uploadWithAxios = async ({ files }) => {
     const formData = new FormData();
@@ -97,15 +102,15 @@ export default function Upload() {
       setUploadReturn(res.data.files || []);
       setHideUploader(true);
       setImageURL('');
-      toast.success('Files uploaded successfully');
+
 
       //fileUploadRef.current.clear();
       setUploadProgress(0);
-console.log(res.data.files[0].url);
+      console.log(res.data.files[0].url);
       setAudioURL(res.data.files[0].url);
     } catch (err) {
       console.error(err);
-      toast.error('Upload failed');
+
     }
   };
 
@@ -131,7 +136,7 @@ console.log(res.data.files[0].url);
       setImageAttachmentId(res.data.files[0].attachment_id);
 
     } catch (err) {
-      toast.error('Image upload failed');
+
     }
   };
 
@@ -187,17 +192,17 @@ console.log(res.data.files[0].url);
 
     // ✅ Validate required data
     if (!user_id) {
-      toast.error('User not loaded yet');
+
       return;
     }
 
     if (!audioURL || !imageURL) {
-      toast.error('Please upload both audio and image');
+
       return;
     }
 
     if (!toneNotesForm.toneTitle?.trim()) {
-      toast.error('Title is required');
+
       return;
     }
 
@@ -239,23 +244,7 @@ console.log(res.data.files[0].url);
 
       // ✅ Proper response handling
       if (res.data?.success) {
-        // toast.success('Tone Uploaded!', {
-        //   position: 'bottom-right',
-        //   autoClose: 3000,
-        //   theme: 'colored',
-        // });
 
-        // ✅ Optional: reset form
-        // setToneNotesForm({
-        //   toneTitle: '',
-        //   toneGenres: [],
-        //   toneInstruments: [],
-        //   toneSignalFlow: '',
-        //   toneShortDesc: '',
-        //   toneDescription: '',
-        //   toneMakePublic: false,
-        //   toneAllowDownload: false,
-        // });
 
         // setAudioURL('');
         // setImageURL('');
@@ -269,11 +258,7 @@ console.log(res.data.files[0].url);
     } catch (err) {
       console.error('Upload error:', err);
 
-      toast.error(
-        err?.response?.data?.error ||
-        err.message ||
-        'Something went wrong.'
-      );
+
     } finally {
       setToneNotesFormLoading(false);
     }
@@ -287,9 +272,10 @@ console.log(res.data.files[0].url);
           <Header />
 
           <div className='flex flex-col items-center bg-[#141414] w-full min-h-screen'>
-            <div className='w-full border-b-2 border-white mb-5'>
-              <div className='max-w-[1300px] mx-auto px-6 py-5'>
-                <h1 className='text-white text-3xl font-bold tracking-wider'>
+            {/*Page Title*/}
+            <div className='flex flex-row justify-center items-center w-full p-[20px] border-b-[3px] border-white mb-5'>
+              <div className='max-w-[1300px] w-full px-6'>
+                <h1 className='text-white text-[30px] font-bold leading-4 tracking-wider py-5'>
                   UPLOAD
                 </h1>
               </div>
@@ -551,7 +537,7 @@ console.log(res.data.files[0].url);
             </div>
           </div>
         </div>
-        <ToastContainer />
+
       </>
     </RequireAuth>
   );

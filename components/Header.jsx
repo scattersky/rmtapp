@@ -20,11 +20,15 @@ export default function Header() {
 
   useEffect(() => {
     const fetchCurrentcurrentUserData = async () => {
+      if (!user_id) {
+        return;
+      }
       try {
         const response = await axios.get(
           'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
         );
         setCurrentUserData(response.data); // Axios data is in response.data
+        console.log(response.data);
       } catch (err) {
         setCurrentUserError(err);
         console.log(currentUserError);
@@ -86,10 +90,21 @@ export default function Header() {
             </a>
           </div>
           <div className='flex items-center justify-center'>
+            <Link
+              className='cursor-pointer'
+              href={{
+                pathname: '/profile',
+                query: {
+                  id: user_id,
+                  name: currentUserData.user_username,
+                },
+              }}
+            >
             <img
               src={currentUserData.author_image_url}
-              className='w-full max-w-[50px] rounded-full'
+              className='w-full max-w-[45px] rounded-full cursor-pointer'
             />
+            </Link>
           </div>
           <div className='flex items-center justify-center'>
             <Link

@@ -59,9 +59,13 @@ function SingleTone() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!params?.id) {
+        setCurrentUserLoading(true);
+        return;
+      }
       try {
         const response = await axios.get(
-          'https://ratemytone.com/wp-json/wp/v2/music_list/' + params.id
+          'https://ratemytone.com/wp-json/wp/v2/music_list/' + params?.id
         );
         setData(response.data); // Axios data is in response.data
         setLoading(false);
@@ -70,11 +74,18 @@ function SingleTone() {
         setLoading(false);
       }
     };
+    fetchData();
+  }, [params?.id]);
 
+  useEffect(() => {
     const fetchAuthorData = async () => {
+      if (!params?.author) {
+        setCurrentUserLoading(true);
+        return;
+      }
       try {
         const response = await axios.get(
-          'https://ratemytone.com/wp-json/wp/v2/users/' + params.author
+          'https://ratemytone.com/wp-json/wp/v2/users/' + params?.author
         );
         setAuthorData(response.data); // Axios data is in response.data
         setAuthorLoading(false);
@@ -83,29 +94,19 @@ function SingleTone() {
         setAuthorLoading(false);
       }
     };
+    fetchAuthorData();
+  }, [params?.author]);
 
-    const fetchCurrentUserData = async () => {
-      if (!user_id) {
-        setCurrentUserLoading(false);
+
+  useEffect(() => {
+    const fetchReviewData = async () => {
+      if (!params?.id) {
+        setCurrentUserLoading(true);
         return;
       }
       try {
-
         const response = await axios.get(
-          'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
-        );
-        setCurrentUserData(response.data); // Axios data is in response.data
-        setCurrentUserLoading(false);
-      } catch (err) {
-        setCurrentUserError(err);
-        setCurrentUserLoading(false);
-      }
-    };
-
-    const fetchReviewData = async () => {
-      try {
-        const response = await axios.get(
-          'https://ratemytone.com/wp-json/my/v1/my_cpt?related_id=' + params.id
+          'https://ratemytone.com/wp-json/my/v1/my_cpt?related_id=' + params?.id
         );
         setReviewData(response.data); // Axios data is in response.data
         setReviewLoading(false);
@@ -114,15 +115,30 @@ function SingleTone() {
         setReviewLoading(false);
       }
     };
-    fetchCurrentUserData();
-    fetchAuthorData();
-    fetchData();
     fetchReviewData();
-  }, [triggerFetchReviews, user_id, params]);
+  }, [params?.id, triggerFetchReviews]);
+
+  useEffect(() => {
+    const fetchCurrentUserData = async () => {
+      if (!user_id) {
+        setCurrentUserLoading(true);
+        return;
+      }
+      try {
+        const response = await axios.get(
+          'https://ratemytone.com/wp-json/wp/v2/users/' + user_id
+        );
+        setCurrentUserData(response.data); // Axios data is in response.data
+        setCurrentUserLoading(false);
+      } catch (err) {
+        setCurrentUserError(err);
+        setCurrentUserLoading(true);
+      }
+    };
+    fetchCurrentUserData();
+  }, [user_id]);
 
   const handleToneReviewSubmit = async () => {
-
-
     if (!token) {
       console.error('No JWT token found. User not authenticated.');
       return;
@@ -201,22 +217,14 @@ function SingleTone() {
         <Header />
         <div className='flex flex-1 flex-col items-center bg-[#141414] w-full h-full min-w-[100vw] min-h-[100vh]'>
           {/*Page Title*/}
-          <div className='flex flex-row justify-evenly items-center w-full p-[20px] border-b-[3px] border-white mb-3'>
+          <div className='flex flex-row justify-center items-center w-full p-[20px] border-b-[3px] border-white mb-5'>
             <div className='max-w-[1300px] w-full px-6'>
-              <div className='block md:hidden'>
-                <ReactStars
-                  edit={false}
-                  count={5}
-                  value={data.average_rating}
-                  size={25}
-                  activeColor='#ffd700'
-                />
-              </div>
-              <h1 className='text-white text-[30px] font-bold leading-[36px] tracking-wider uppercase py-5'>
+              <h1 className='text-white text-[30px] font-bold leading-4 uppercase tracking-wider py-5'>
                 {params.title}
               </h1>
             </div>
           </div>
+
           {/*Page Content*/}
           <div className='flex flex-col-reverse md:flex-row min-h-[100vh] max-w-[1300px] w-full py-6 px-6 justify-between gap-6'>
             <div className='w-full md:w-[20%]'>
