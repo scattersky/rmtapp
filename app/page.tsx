@@ -23,9 +23,27 @@ import ScrollToTop from "react-scroll-to-top";
 import { FaArrowUp } from "react-icons/fa6";
 import { MdAdd, MdArrowDownward, MdArrowUpward } from "react-icons/md";
 import { SlideDown } from "react-slidedown";
-import { Tone } from "@/types/tone";
+
 import {Collapse} from 'react-collapse';
 import {useRouter} from "next/navigation";
+
+export type Tone = {
+  id: string;
+  title?: string;
+  description?: string;
+  genres?: string[];
+  instruments?: string[];
+  image?: string;
+  createdBy?: string;
+  createdAt?: any;
+
+  author_name?: string;
+  author_image_url?: string;
+
+  music_url?: string;
+  review_count?: number;
+  average_rating?: number;
+};
 
 export default function ToneFeed() {
   const { user, loading: authLoading } = useAuth();

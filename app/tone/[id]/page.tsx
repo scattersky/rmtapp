@@ -28,9 +28,27 @@ import StarRatings from 'react-star-ratings';
 import { SlideDown } from "react-slidedown";
 import { IoSend } from "react-icons/io5";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
-import { Tone } from "@/types/tone";
+
 import AuthorCard from "@/components/AuthorCard";
 import {Collapse} from "react-collapse";
+
+export type Tone = {
+  id: string;
+  title?: string;
+  description?: string;
+  genres?: string[];
+  instruments?: string[];
+  image?: string;
+  createdBy?: string;
+  createdAt?: any;
+
+  author_name?: string;
+  author_image_url?: string;
+
+  music_url?: string;
+  review_count?: number;
+  average_rating?: number;
+};
 
 export default function SingleTonePage() {
   const { id } = useParams();
