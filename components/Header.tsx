@@ -74,6 +74,7 @@ export default function Header() {
                 pathname: '/dashboard',
               }}
             >
+
               <div className='block px-5 py-2 text-white uppercase text-[16px] cursor-pointer rounded-full bg-[#53A870] font-normal'>
                 Dashboard
               </div>
