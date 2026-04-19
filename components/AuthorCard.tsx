@@ -68,7 +68,7 @@ export default function AuthorCard({
     'https://ratemytone.com/wp-content/uploads/2026/02/b_favs_recieved.webp';
 
   return (
-    <div className="flex flex-col items-center w-full gap-8 p-5 rounded-3xl border border-white/20 bg-[#1a1a1a]">
+    <div className="flex flex-col items-center w-full gap-8 px-5 pt-5 pb-12 rounded-3xl border border-white/20 bg-[#1a1a1a]">
 
       {/* PROFILE IMAGE */}
       <img
@@ -85,7 +85,7 @@ export default function AuthorCard({
         {author.id && (
           <>
             <Link href={`/profile/${author.id}`}>
-              <span className="text-[#53A870] cursor-pointer">
+              <span className="text-[#42b27c] cursor-pointer">
                 @{author.username}
               </span>
             </Link>
@@ -153,7 +153,7 @@ export default function AuthorCard({
               {author.favoriteGenres.map((genre) => (
                 <span
                   key={genre}
-                  className="bg-[#53A870] text-white text-xs px-3 py-1 rounded-full"
+                  className="bg-[#42b27c] text-white text-xs px-3 py-1 rounded-full"
                 >
           {genre}
         </span>
@@ -188,7 +188,7 @@ export default function AuthorCard({
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white hover:text-[#53A870] transition"
+                    className="text-white hover:text-[#42b27c] transition"
                   >
                     {social.icon}
                   </a>

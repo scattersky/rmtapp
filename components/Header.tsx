@@ -1,11 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+
 import Link from 'next/link';
 import {useAuth} from "@/context/AuthContext";
 
 export default function Header() {
-
+  const { user, userData } = useAuth();
 
   const rmtLogo =
     'https://ratemytone.com/wp-content/uploads/2024/09/RMT-Logo-lg-1.png';
@@ -27,7 +27,7 @@ export default function Header() {
         <div className='flex items-center justify-center gap-5'>
           <div className='hidden md:flex items-center justify-center'>
             <a
-              href='#'
+              href='https://ratemytone.com/'
               className='block text-white uppercase text-[16px] hover:text-[#3FE297] mr-5'
             >
               Home
@@ -44,13 +44,13 @@ export default function Header() {
             </Link>
 
             <a
-              href='#'
+              href='https://ratemytone.com/blog/'
               className='block text-white uppercase text-[16px] hover:text-[#3FE297] mr-5'
             >
               Blog
             </a>
             <a
-              href='#'
+              href='https://ratemytone.com/contact/'
               className='block text-white uppercase text-[16px] hover:text-[#3FE297] mr-5'
             >
               Contact
@@ -64,7 +64,7 @@ export default function Header() {
           </div>
           <div className='flex items-center justify-center'>
             <img
-              src={profile_placeholder}
+              src={userData?.image || "https://ratemytone.com/wp-content/uploads/2026/04/author_temp_image.webp"}
               className='w-full max-w-[50px] rounded-full'
             />
           </div>
@@ -75,7 +75,7 @@ export default function Header() {
               }}
             >
 
-              <div className='block px-5 py-2 text-white uppercase text-[16px] cursor-pointer rounded-full bg-[#53A870] font-normal'>
+              <div className='block px-5 py-2 text-white uppercase text-[16px] cursor-pointer rounded-full bg-[#42b27c] font-normal'>
                 Dashboard
               </div>
             </Link>

@@ -45,6 +45,8 @@ export type Tone = {
   average_rating?: number;
 };
 
+
+
 export default function ToneFeed() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -72,6 +74,7 @@ export default function ToneFeed() {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewStatus, setReviewStatus] = useState(false);
+
 
   const [genreOperator, setGenreOperator] = useState<"AND" | "OR">("OR");
   const [instrumentOperator, setInstrumentOperator] = useState<"AND" | "OR">("OR");
@@ -274,7 +277,7 @@ export default function ToneFeed() {
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
-    if (!user) return;
+    if (!user || !currentUserData) return;
 
     const formData = new FormData(event.currentTarget);
     const toneId = formData.get("reviewToneID") as string;
@@ -282,7 +285,8 @@ export default function ToneFeed() {
     await addDoc(collection(db, "reviews"), {
       toneId,
       userId: user.uid,
-      userName: user.displayName || "Anonymous",
+      userName: currentUserData.username || "Anonymous",
+      userImage: currentUserData.image || "/avatar.png",
       rating: reviewRating,
       text: reviewText,
       createdAt: serverTimestamp(),
@@ -293,10 +297,8 @@ export default function ToneFeed() {
       [toneId]: true,
     }));
 
-    // optional reset
     setReviewText("");
     setReviewRating(0);
-
   };
 
   const [openItemId, setOpenItemId] = useState(null);
@@ -304,10 +306,12 @@ export default function ToneFeed() {
     setOpenItemId((prev) => (prev === id ? null : id));
   };
 
+
+
   if (loading || currentUserLoading || authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#141414]">
-        <Audio height={100} width={100} color="#53A870" />
+        <Audio height={100} width={100} color="#42b27c" />
       </div>
     );
   }
@@ -377,7 +381,7 @@ export default function ToneFeed() {
                   <button
                     onClick={() => setGenreOperator("OR")}
                     className={`px-2 py-1 text-xs rounded ${
-                      genreOperator === "OR" ? "bg-[#53A870]" : "border"
+                      genreOperator === "OR" ? "bg-[#42b27c]" : "border"
                     }`}
                   >
                     OR
@@ -385,7 +389,7 @@ export default function ToneFeed() {
                   <button
                     onClick={() => setGenreOperator("AND")}
                     className={`px-2 py-1 text-xs rounded ${
-                      genreOperator === "AND" ? "bg-[#53A870]" : "border"
+                      genreOperator === "AND" ? "bg-[#42b27c]" : "border"
                     }`}
                   >
                     AND
@@ -432,7 +436,7 @@ export default function ToneFeed() {
                   <button
                     onClick={() => setInstrumentOperator("OR")}
                     className={`px-2 py-1 text-xs rounded ${
-                      instrumentOperator === "OR" ? "bg-[#53A870]" : "border"
+                      instrumentOperator === "OR" ? "bg-[#42b27c]" : "border"
                     }`}
                   >
                     OR
@@ -440,7 +444,7 @@ export default function ToneFeed() {
                   <button
                     onClick={() => setInstrumentOperator("AND")}
                     className={`px-2 py-1 text-xs rounded ${
-                      instrumentOperator === "AND" ? "bg-[#53A870]" : "border"
+                      instrumentOperator === "AND" ? "bg-[#42b27c]" : "border"
                     }`}
                   >
                     AND
@@ -471,13 +475,14 @@ export default function ToneFeed() {
                 onReviewTextChange={(e) => setReviewText(e.target.value)}
                 onReviewRatingChange={setReviewRating}
                 hasUserReviewed={!!userReviewsMap[post.id]}
+
               />
             );
           })}
         </div>
       </div>
 
-      <ScrollToTop smooth className="bg-[#53A870]" component={<FaArrowUp />} />
+      <ScrollToTop smooth className="bg-[#42b27c]" component={<FaArrowUp />} />
     </div>
   );
 }

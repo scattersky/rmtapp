@@ -1,33 +1,205 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+
+
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
-export default function Dashboard() {
-    const { user, loading, logout } = useAuth();
-    const router = useRouter();
 
-    useEffect(() => {
-        if (!loading && !user) {
-            router.push("/login");
-        }
-    }, [user, loading]);
+import { Audio } from "react-loader-spinner";
 
-    if (loading) return <p>Loading...</p>;
+import AuthorCard from "@/components/AuthorCard";
+import {Tooltip} from "react-tooltip";
 
+export type Tone = {
+  id: string;
+  title?: string;
+  description?: string;
+  genres?: string[];
+  instruments?: string[];
+  image?: string;
+  createdBy?: string;
+  createdAt?: any;
+  author_name?: string;
+  author_image_url?: string;
+  music_url?: string;
+  review_count?: number;
+  average_rating?: number;
+};
+
+const postsMoreThan20 = 'https://ratemytone.com/wp-content/uploads/2026/02/b_20posts.webp';
+const badgeReviewsGiven =
+  'https://ratemytone.com/wp-content/uploads/2026/02/b_reviews_given.webp';
+const badgeReviewsReceived =
+  'https://ratemytone.com/wp-content/uploads/2026/02/b_reviews_received.webp';
+const badgeToneFavsRecieved =
+  'https://ratemytone.com/wp-content/uploads/2026/02/b_favs_recieved.webp';
+
+
+export default function DashboardPage() {
+  const { user, loading: authLoading } = useAuth();
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+
+
+  // 🔥 FETCH CURRENT USER
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUser = async () => {
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+
+      if (snap.exists()) {
+        const data = snap.data();
+        setUserData(data);
+        setLoading(false)
+      }
+    };
+
+    fetchUser();
+  }, [user]);
+
+
+
+
+
+  // ⏳ LOADING
+  if (loading || authLoading) {
     return (
-        <div className="p-10">
-            <h1 className="text-2xl font-bold">
-                Welcome {user?.displayName || user?.email}
-            </h1>
-
-            <button
-                className="mt-4 bg-red-500 text-white px-4 py-2"
-                onClick={logout}
-            >
-                Logout
-            </button>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-[#141414]">
+        <Audio height={100} width={100} color="#42b27c" />
+      </div>
     );
+  }
+
+
+  return (
+
+    <div className="bg-[#141414] min-h-screen text-white">
+      <div className='h-25 flex justify-between items-center  bg-[#141414] border-b-[3px] border-white'>
+        <div className='mx-auto w-full max-w-341.5 p-4'>
+          <h1 className='text-white text-3xl font-bold uppercase'>
+            Dashboard
+          </h1>
+        </div>
+      </div>
+      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-8 ">
+
+        <div className="w-full md:w-[20%]">
+          <div className="flex flex-col items-center w-full gap-8 px-5 pt-5 pb-12 rounded-3xl border border-white/20 bg-[#1a1a1a]">
+
+            {/* PROFILE IMAGE */}
+            <img
+              src={userData?.image || "/avatar.png"}
+              className="w-[120px] h-[120px] rounded-full object-cover"
+            />
+
+            {/* NAME */}
+            <div className="text-center">
+              <h3 className="text-white text-lg font-bold">
+                {userData?.username || "Unknown"}
+              </h3>
+
+              {userData?.uid && (
+                <>
+                  <Link href={`/profile/${userData?.uid}`}>
+              <span className="text-[#42b27c] cursor-pointer">
+                @{userData?.username}
+              </span>
+                  </Link>
+                  <div className='flex items-center justify-center gap-2 mt-4'>
+                    <div>
+                      <img
+                        data-tooltip-id='badge20posts'
+                        data-tooltip-content='20+ Tones Posted'
+                        src={postsMoreThan20}
+                        className='w-[30px]'
+                      />
+                      <Tooltip id='badge20posts' />
+                    </div>
+                    <div>
+                      <img
+                        data-tooltip-id='badge10reviews'
+                        data-tooltip-content='10+ Reviews Received'
+                        src={badgeReviewsReceived}
+                        className='w-[30px]'
+                      />
+                      <Tooltip id='badge10reviews' />
+                    </div>
+                    <div>
+                      <img
+                        data-tooltip-id='badge10reviewsgiven'
+                        data-tooltip-content='10+ Reviews Given'
+                        src={badgeReviewsGiven}
+                        className='w-[30px]'
+                      />
+                      <Tooltip id='badge10reviewsgiven' />
+                    </div>
+                    <div>
+                      <img
+                        data-tooltip-id='badge30ToneFavs'
+                        data-tooltip-content='30+ Tones Favorited'
+                        src={badgeToneFavsRecieved}
+                        className='w-[30px]'
+                      />
+                      <Tooltip id='badge30ToneFavs' />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/*DASHBOARD BTNS*/}
+            <div className="flex flex-col gap-4 w-full mt-6">
+              <button className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+                Edit Profile
+              </button>
+              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+                My Favorites
+              </button>
+              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+                Reviews
+              </button>
+              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+                Tone Feed
+              </button>
+              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#910106] hover:border-[#910106] transition duration-400">
+                Logout
+              </button>
+            </div>
+          </div>
+
+        </div>
+        <div className="w-full md:w-[80%]">
+          {/* MAIN CARD */}
+          <div className="px-8 py-6 mb-6 flex flex-col md:flex-row gap-6 rounded-3xl border border-white/20 bg-[#1a1a1a]">
+            <h2 className='text-white text-2xl font-[500] '>
+              Edit Profile
+            </h2>
+
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+  );
 }

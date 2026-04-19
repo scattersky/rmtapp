@@ -4,7 +4,7 @@ import React, {useState} from "react";
 import Link from "next/link";
 import { MdFavorite, MdFavoriteBorder, MdModeComment } from "react-icons/md";
 import { AudioPlayer } from "react-audio-play";
-
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { SlideDown } from "react-slidedown";
 import { IoSend } from "react-icons/io5";
 import { MagicCard } from "@/components/ui/magic-card"
@@ -12,6 +12,7 @@ import {CometCard} from "@/components/ui/comet-card";
 import {Collapse} from 'react-collapse';
 import StarRatings from "react-star-ratings";
 import {Tooltip} from "react-tooltip";
+import {useAuth} from "@/context/AuthContext";
 
 // ✅ TYPES
 type TonePost = {
@@ -28,7 +29,9 @@ type TonePost = {
   average_rating?: number;
   createdBy?: string;
   author_name?: string;
+
   author_image_url?: string;
+  hasUserReviewed?: boolean;
 };
 
 type MusicListCardProps = {
@@ -39,6 +42,7 @@ type MusicListCardProps = {
   openItemId: string | null;
   reviewStatus: boolean;
   hasUserReviewed: boolean;
+
   currentUserData: {
     image?: string;
   } | null;
@@ -60,17 +64,27 @@ export default function MusicListCard({
                                         hasUserReviewed,
                                         handleToneReviewSubmit,
                                         onReviewTextChange,
+
                                         onReviewRatingChange,
                                       }: MusicListCardProps) {
-
+  const { user, userData } = useAuth();
   const [reviewRating, setReviewRating] = useState(0);
   const handleRatingChange = (newRating: number) => {
     setReviewRating(newRating);
   };
-
+  const isOwner = user && post && user.uid === post.createdBy;
   return (
-
-    <div className=" flex flex-col gap-5 mb-[40px]  px-[20px] pt-[20px] pb-[5px] rounded-3xl border border-white/20 bg-[#1a1a1a]">
+    <div className="relative border rounded-3xl mb-[40px] ">
+      <GlowingEffect
+        blur={0}
+        borderWidth={3}
+        spread={80}
+        glow={true}
+        disabled={false}
+        proximity={64}
+        inactiveZone={0.01}
+      />
+    <div className=" flex flex-col gap-5  px-[20px] pt-[20px] pb-[5px] rounded-3xl border  border-white/10 bg-[#1a1a1a]">
 
       {/* UPPER */}
       <div className="flex flex-col md:flex-row gap-4">
@@ -90,7 +104,7 @@ export default function MusicListCard({
             ))}
 
             {post.instruments?.map((inst) => (
-              <div key={inst} className="bg-[#53A870] px-3 py-1 rounded-full">
+              <div key={inst} className="bg-[#42b27c] px-3 py-1 rounded-full">
                 {inst}
               </div>
             ))}
@@ -98,15 +112,9 @@ export default function MusicListCard({
 
           {/* AUTHOR */}
           <Link
-            href={{
-              pathname: "/profile",
-              query: {
-                id: post.author,
-                name: post.author_name,
-              },
-            }}
+            href={`/profile/${post.createdBy}`}
           >
-            <div className="flex gap-2 items-center text-[#53A870] cursor-pointer">
+            <div className="flex gap-2 items-center text-[#42b27c] cursor-pointer">
               <img
                 src={post.author_image_url || "/avatar.png"}
                 className="h-[35px] w-[35px] rounded-full"
@@ -124,7 +132,7 @@ export default function MusicListCard({
               src={post.music_url}
               backgroundColor="#272727"
               width="100%"
-              sliderColor="#53A870"
+              sliderColor="#42b27c"
             />
             </div>
           )}
@@ -139,7 +147,7 @@ export default function MusicListCard({
         <Link
           href={`/tone/${post.id}`}
         >
-          <div className="px-[60px] py-2 border border-white rounded-full cursor-pointer hover:bg-[#53A870] hover:border-[#53A870]">
+          <div className="px-[60px] py-2 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
             Tone Notes
           </div>
         </Link>
@@ -190,9 +198,13 @@ export default function MusicListCard({
 
       {/* REVIEW */}
       <Collapse isOpened={openItemId === post.id}>
-        {hasUserReviewed ? (
+        {isOwner ? (
           <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4">
-            You’ve already rated this tone 🎧
+            Sorry, you cannot rate your own tone.
+          </div>
+        ) : hasUserReviewed ? (
+          <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4">
+            You’ve already rated this tone.
           </div>
         ) : (
           <form onSubmit={handleToneReviewSubmit} className="mb-4">
@@ -208,6 +220,7 @@ export default function MusicListCard({
               <input
                 type="text"
                 onChange={onReviewTextChange}
+                maxLength={220}
                 placeholder="Leave a review..."
                 className="flex-1 bg-[#707070] px-3 py-2 rounded-full outline-none"
               />
@@ -226,17 +239,20 @@ export default function MusicListCard({
 
               <button
                 type="submit"
-                className="bg-[#53A870] px-4 py-2 rounded-full flex items-center gap-2"
+                className="bg-[#42b27c] px-4 py-2 rounded-full flex items-center gap-2"
               >
                 Submit <IoSend />
               </button>
             </div>
           </form>
-          )}
+        )}
+
 
       </Collapse>
 
 
     </div>
+    </div>
+
   );
 }

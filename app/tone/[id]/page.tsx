@@ -41,7 +41,6 @@ export type Tone = {
   image?: string;
   createdBy?: string;
   createdAt?: any;
-
   author_name?: string;
   author_image_url?: string;
 
@@ -67,6 +66,8 @@ export default function SingleTonePage() {
   const [reviewRating, setReviewRating] = useState(0);
 
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [userReviewsMap, setUserReviewsMap] = useState<Record<string, boolean>>({});
+  const [hasUserReviewed, setHasUserReviewed] = useState(false);
 
   // 🔥 FETCH TONE + AUTHOR
   useEffect(() => {
@@ -124,6 +125,32 @@ export default function SingleTonePage() {
     fetchReviews();
   }, [id]);
 
+  // CHECK IF USER HAS REVIEWED TONE
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchReviews = async () => {
+      const snapshot = await getDocs(collection(db, "reviews"));
+
+      const map: Record<string, boolean> = {};
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+
+        // if current user reviewed this tone
+        if (data.userId === user.uid && data.toneId) {
+          map[data.toneId] = true;
+          setHasUserReviewed(true);
+        }
+      });
+
+      setUserReviewsMap(map);
+
+    };
+
+    fetchReviews();
+  }, [user]);
+
   // 🔥 FETCH CURRENT USER
   useEffect(() => {
     if (!user) return;
@@ -163,12 +190,13 @@ export default function SingleTonePage() {
 
   // ⭐ SUBMIT REVIEW
   const handleSubmitReview = async () => {
-    if (!user || !tone) return;
+    if (!user || !tone || !userData) return;
 
     await addDoc(collection(db, "reviews"), {
       toneId: tone.id,
       userId: user.uid,
-      userName: user.displayName || "Anonymous",
+      userName: userData.username || "Anonymous",
+      userImage: userData.image || "/avatar.png", // ✅ THIS IS THE KEY
       text: reviewText,
       rating: reviewRating,
       createdAt: serverTimestamp(),
@@ -179,21 +207,26 @@ export default function SingleTonePage() {
       query(collection(db, "reviews"), where("toneId", "==", tone.id))
     );
 
-    setReviews(snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })));
+    setReviews(
+      snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+    );
 
     setReviewText("");
     setReviewRating(0);
     setIsReviewOpen(false);
+    setHasUserReviewed(true);
   };
+
+
 
   // ⏳ LOADING
   if (loading || authLoading || reviewLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#141414]">
-        <Audio height={100} width={100} color="#53A870" />
+        <Audio height={100} width={100} color="#42b27c" />
       </div>
     );
   }
@@ -216,7 +249,7 @@ export default function SingleTonePage() {
           </h1>
         </div>
       </div>
-      <div className="max-w-[1366px] mx-auto px-6 pb-6 pt-12 flex gap-8 ">
+      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-8 ">
 
           <div className="w-full md:w-[20%]">
             <AuthorCard
@@ -248,25 +281,25 @@ export default function SingleTonePage() {
 
             {/* DETAILS */}
             <div className="flex flex-col justify-between w-full">
-              <div className="flex gap-2 justify-end flex-wrap">
-                {tone.genres?.map((genre) => (
-                  <div key={genre} className="bg-[#8E8E8E] px-3 py-1 rounded-full">
-                    {genre}
-                  </div>
-                ))}
+              {/*<div className="flex gap-2 justify-end flex-wrap">*/}
+              {/*  {tone.genres?.map((genre) => (*/}
+              {/*    <div key={genre} className="bg-[#8E8E8E] px-3 py-1 rounded-full">*/}
+              {/*      {genre}*/}
+              {/*    </div>*/}
+              {/*  ))}*/}
 
-                {tone.instruments?.map((inst) => (
-                  <div key={inst} className="bg-[#53A870] px-3 py-1 rounded-full">
-                    {inst}
-                  </div>
-                ))}
-              </div>
+              {/*  {tone.instruments?.map((inst) => (*/}
+              {/*    <div key={inst} className="bg-[#42b27c] px-3 py-1 rounded-full">*/}
+              {/*      {inst}*/}
+              {/*    </div>*/}
+              {/*  ))}*/}
+              {/*</div>*/}
 
               <div className="flex items-center justify-between gap-2 mt-2 mb-4">
               {/* AUTHOR */}
               {author && (
                 <Link href={`/profile/${tone.createdBy}`}>
-                  <div className="flex items-center gap-2 text-[#53A870] cursor-pointer">
+                  <div className="flex items-center gap-2 text-[#42b27c] cursor-pointer">
                     <img
                       src={author.image || "/avatar.png"}
                       className="w-10 h-10 rounded-full"
@@ -301,12 +334,12 @@ export default function SingleTonePage() {
 
 
               {/* AUDIO */}
-              <div className='rounded-lg overflow-hidden'>
+              <div className='rounded-lg overflow-hidden mb-2'>
                 <AudioPlayer
                   src={tone.music_url || ""}
                   backgroundColor="#272727"
                   width="100%"
-                  sliderColor="#53A870"
+                  sliderColor="#42b27c"
                 />
               </div>
               {/* GENRES */}
@@ -330,7 +363,7 @@ export default function SingleTonePage() {
               <h2 className="text-xl">Reviews</h2>
 
               <button
-                className="bg-[#53A870] px-4 py-2 rounded-full cursor-pointer"
+                className="bg-[#42b27c] px-4 py-2 rounded-full cursor-pointer"
                 onClick={() => setIsReviewOpen(!isReviewOpen)}
               >
                 Rate My Tone
@@ -339,61 +372,81 @@ export default function SingleTonePage() {
 
             {/* REVIEW FORM */}
             <Collapse isOpened={isReviewOpen}>
-              <div className="flex gap-4 bg-[#3a3a3a] p-3 rounded-full items-center mt-12">
-                <img
-                  src={author?.image}
-                  className="h-[40px] w-[40px] rounded-full"
-                  alt="user"
-                />
+              {hasUserReviewed ? (
+                  <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white my-4">
+                    You’ve already rated this tone 🎧
+                  </div>
+                ) : (
+                <div className="flex gap-4 bg-[#3a3a3a] p-3 rounded-full items-center mt-12">
+                  <img
+                    src={author?.image}
+                    className="h-[40px] w-[40px] rounded-full"
+                    alt="user"
+                  />
 
-                <input
-                  type="text"
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                  placeholder="Leave a review..."
-                  className="flex-1 bg-[#707070] px-3 py-2 rounded-full outline-none"
-                />
+                  <input
+                    type="text"
+                    value={reviewText}
+                    maxLength={220}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    placeholder="Leave a review..."
+                    className="flex-1 bg-[#707070] px-3 py-2 rounded-full outline-none"
+                  />
 
-                <StarRatings
-                  rating={0}
-                  starEmptyColor="#686868"
-                  starRatedColor="white"
-                  changeRating={setReviewRating}
-                  numberOfStars={5}
-                  name='rating'
-                  starDimension="25px"
-                  starSpacing="2px"
-                  starHoverColor="white"
-                />
+                  <StarRatings
+                    rating={reviewRating}
+                    starEmptyColor="#686868"
+                    starRatedColor="white"
+                    changeRating={setReviewRating}
+                    numberOfStars={5}
+                    name='rating'
+                    starDimension="25px"
+                    starSpacing="2px"
+                    starHoverColor="white"
+                  />
 
-                <button
-                  onClick={handleSubmitReview}
-                  className="bg-[#53A870] px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer"
-                >
-                  Submit <IoSend />
-                </button>
-              </div>
+                  <button
+                    onClick={handleSubmitReview}
+                    className="bg-[#42b27c] px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer"
+                  >
+                    Submit <IoSend />
+                  </button>
+                </div>
+              )}
+
+
 
             </Collapse>
 
             {/* REVIEW LIST */}
             {reviews.map((review) => (
-              <div key={review.id} className="mt-4 border-t pt-3">
-                <StarRatings
-                  rating={review.rating}
+              <div key={review.id} className="mt-4 border-t pt-3 flex gap-3 items-start">
 
-                  starEmptyColor="#686868"
-                  starRatedColor="white"
-                  numberOfStars={5}
-                  name='rating'
-                  starDimension="25px"
-                  starSpacing="2px"
+                {/* USER IMAGE */}
+                <img
+                  src={review.userImage || "/avatar.png"}
+                  className="w-10 h-10 rounded-full object-cover"
+                  alt="review user"
                 />
 
-                <p>{review.text}</p>
-                <span className="text-sm text-gray-400">
-                  {review.userName}
-                </span>
+                <div className="flex flex-col">
+                  <StarRatings
+                    rating={review.rating}
+                    starEmptyColor="#686868"
+                    starRatedColor="white"
+                    numberOfStars={5}
+                    name="rating"
+                    starDimension="20px"
+                    starSpacing="2px"
+                  />
+
+                  <p>{review.text}</p>
+
+                  <span className="text-sm text-gray-400">
+        {review.userName}
+      </span>
+                </div>
+
               </div>
             ))}
           </div>
