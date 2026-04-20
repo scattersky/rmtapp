@@ -18,7 +18,7 @@ import {useAuth} from "@/context/AuthContext";
 type TonePost = {
   id: string;
   title?: string;
-  description?: string;
+  shortDescription?: string;
   image?: string;
   featured_media_src_url?: string;
   genres?: string[];
@@ -75,15 +75,16 @@ export default function MusicListCard({
   const isOwner = user && post && user.uid === post.createdBy;
   return (
     <div className="relative border rounded-3xl mb-[40px] ">
-      <GlowingEffect
-        blur={0}
-        borderWidth={3}
-        spread={80}
-        glow={true}
-        disabled={false}
-        proximity={64}
-        inactiveZone={0.01}
-      />
+      {/*<GlowingEffect*/}
+      {/*  blur={0}*/}
+      {/*  borderWidth={3}*/}
+      {/*  spread={80}*/}
+      {/*  glow={true}*/}
+      {/*  disabled={false}*/}
+      {/*  proximity={64}*/}
+      {/*  inactiveZone={0.01}*/}
+      {/*/>*/}
+      <CometCard>
     <div className=" flex flex-col gap-5  px-[20px] pt-[20px] pb-[5px] rounded-3xl border  border-white/10 bg-[#1a1a1a]">
 
       {/* UPPER */}
@@ -98,7 +99,7 @@ export default function MusicListCard({
           {/* TAGS */}
           <div className="flex gap-2 justify-end flex-wrap">
             {post.genres?.map((genre) => (
-              <div key={genre} className="bg-[#8E8E8E] px-3 py-1 rounded-full">
+              <div key={genre} className="bg-gray-500 px-3 py-1 rounded-full">
                 {genre}
               </div>
             ))}
@@ -140,14 +141,14 @@ export default function MusicListCard({
       </div>
 
       {/* DESCRIPTION */}
-      <p className='pl-2'>{post.description || "No description available."}</p>
+      <p className='pl-2'>{post.shortDescription || "No description available."}</p>
 
       {/* ACTIONS */}
       <div className="flex justify-between flex-col md:flex-row gap-4">
         <Link
           href={`/tone/${post.id}`}
         >
-          <div className="px-[60px] py-2 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
+          <div className="px-[60px] py-2 border-[1.5px] border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
             Tone Notes
           </div>
         </Link>
@@ -190,7 +191,7 @@ export default function MusicListCard({
             numberOfStars={5}
             name='rating'
             starDimension="25px"
-            starSpacing="2px"
+            starSpacing="0px"
           />
           </div>
         </div>
@@ -233,7 +234,7 @@ export default function MusicListCard({
                 numberOfStars={5}
                 name='rating'
                 starDimension="25px"
-                starSpacing="2px"
+                starSpacing="0px"
                 starHoverColor="white"
               />
 
@@ -252,6 +253,8 @@ export default function MusicListCard({
 
 
     </div>
+      </CometCard>
+      
     </div>
 
   );

@@ -100,7 +100,7 @@ export default function DashboardPage() {
           </h1>
         </div>
       </div>
-      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-8 ">
+      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-6 ">
 
         <div className="w-full md:w-[20%]">
           <div className="flex flex-col items-center w-full gap-8 px-5 pt-5 pb-12 rounded-3xl border border-white/20 bg-[#1a1a1a]">
@@ -168,19 +168,19 @@ export default function DashboardPage() {
 
             {/*DASHBOARD BTNS*/}
             <div className="flex flex-col gap-4 w-full mt-6">
-              <button className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button className="w-full py-1 border-[1.5px] border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
                 Edit Profile
               </button>
-              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
                 My Favorites
               </button>
-              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
                 Reviews
               </button>
-              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
                 Tone Feed
               </button>
-              <button  className="w-full py-1 border border-white rounded-full cursor-pointer hover:bg-[#910106] hover:border-[#910106] transition duration-400">
+              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#910106] hover:border-[#910106] transition duration-400">
                 Logout
               </button>
             </div>

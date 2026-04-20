@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
+import { TbArrowBadgeRightFilled } from "react-icons/tb";
 
 import {
   doc,
@@ -35,9 +36,11 @@ import {Collapse} from "react-collapse";
 export type Tone = {
   id: string;
   title?: string;
-  description?: string;
+  shortDescription?: string;
+  longDescription?: string;
   genres?: string[];
   instruments?: string[];
+  signalFlow?: string[];
   image?: string;
   createdBy?: string;
   createdAt?: any;
@@ -237,8 +240,9 @@ export default function SingleTonePage() {
 
   // ✅ SAFE ARRAYS
   const genres = tone.genres ?? [];
+  const signalFlow = tone.signalFlow ?? [];
   const instruments = tone.instruments ?? [];
-
+  const isOwner = user && tone && user.uid === tone.createdBy;
   return (
 
     <div className="bg-[#141414] min-h-screen text-white">
@@ -249,7 +253,7 @@ export default function SingleTonePage() {
           </h1>
         </div>
       </div>
-      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-8 ">
+      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-6">
 
           <div className="w-full md:w-[20%]">
             <AuthorCard
@@ -295,7 +299,7 @@ export default function SingleTonePage() {
               {/*  ))}*/}
               {/*</div>*/}
 
-              <div className="flex items-center justify-between gap-2 mt-2 mb-4">
+              <div className="flex items-center justify-between gap-2  mb-4">
               {/* AUTHOR */}
               {author && (
                 <Link href={`/profile/${tone.createdBy}`}>
@@ -309,7 +313,7 @@ export default function SingleTonePage() {
                 </Link>
               )}
 
-                <div className="flex items-center justify-end gap-2 mt-2">
+                <div className="flex items-center justify-end gap-2">
                 {/* FAVORITE */}
                 <div onClick={toggleFavorite} className="cursor-pointer mt-2">
                   {favorites.includes(tone.id) ? (
@@ -326,8 +330,8 @@ export default function SingleTonePage() {
                   starRatedColor="white"
                   numberOfStars={5}
                   name='rating'
-                  starDimension="25px"
-                  starSpacing="2px"
+                  starDimension="22px"
+                  starSpacing="0px"
                 />
                 </div>
               </div>
@@ -352,10 +356,40 @@ export default function SingleTonePage() {
                 <strong>Instruments:</strong> {instruments.join(", ")}
               </div>
 
-              {/* DESCRIPTION */}
-              <p className="mt-4">{tone.description}</p>
+              {/* SHORT DESCRIPTION */}
+              <p className="mt-4 text-sm text-gray-300">{tone.shortDescription}</p>
             </div>
           </div>
+
+          {/* TONE DESCRIPTION */}
+          <div className="p-5 mb-6 flex flex-col gap-6 rounded-3xl border border-white/20 bg-[#1a1a1a]">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-gray-400">
+                Signal Flow
+              </p>
+              <div className="flex items-center gap-1 mt-3">
+                {signalFlow.map((item, index) => (
+                  <React.Fragment key={index}>
+                    <div className="py-1.5 px-4 border border-white rounded-md text-sm cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
+                      {item}
+                    </div>
+
+                    {/* Add separator except for last item */}
+                    {index < signalFlow.length - 1 && <span><TbArrowBadgeRightFilled className='text-[#42b27c] text-2xl' /></span>}
+                  </React.Fragment>
+                ))}
+
+              </div>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-gray-400">
+                Description
+              </p>
+              <p className="mt-1 text-md text-gray-200">{tone.longDescription}</p>
+            </div>
+
+          </div>
+
           {/* REVIEWS */}
           <div className="p-5 rounded-3xl border border-white/20 bg-[#1a1a1a]">
 
@@ -372,11 +406,15 @@ export default function SingleTonePage() {
 
             {/* REVIEW FORM */}
             <Collapse isOpened={isReviewOpen}>
-              {hasUserReviewed ? (
-                  <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white my-4">
-                    You’ve already rated this tone 🎧
-                  </div>
-                ) : (
+              {isOwner ? (
+                <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
+                  Sorry, you cannot rate your own tone.
+                </div>
+              ) : hasUserReviewed ? (
+                <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
+                  You’ve already rated this tone.
+                </div>
+              ) : (
                 <div className="flex gap-4 bg-[#3a3a3a] p-3 rounded-full items-center mt-12">
                   <img
                     src={author?.image}
@@ -400,7 +438,7 @@ export default function SingleTonePage() {
                     changeRating={setReviewRating}
                     numberOfStars={5}
                     name='rating'
-                    starDimension="25px"
+                    starDimension="22px"
                     starSpacing="2px"
                     starHoverColor="white"
                   />
@@ -429,7 +467,7 @@ export default function SingleTonePage() {
                   alt="review user"
                 />
 
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-2">
                   <StarRatings
                     rating={review.rating}
                     starEmptyColor="#686868"

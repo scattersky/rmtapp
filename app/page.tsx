@@ -30,7 +30,7 @@ import {useRouter} from "next/navigation";
 export type Tone = {
   id: string;
   title?: string;
-  description?: string;
+  shortDescription?: string;
   genres?: string[];
   instruments?: string[];
   image?: string;
@@ -199,7 +199,7 @@ export default function ToneFeed() {
         const matchesText =
           !term ||
           item.title?.toLowerCase().includes(term) ||
-          item.description?.toLowerCase().includes(term);
+          item.shortDescription?.toLowerCase().includes(term);
 
         // 🎯 GENRES LOGIC
         const genres = item.genres ?? [];

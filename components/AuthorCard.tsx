@@ -167,7 +167,7 @@ export default function AuthorCard({
             <p className="text-xs uppercase tracking-widest text-gray-400">
               Bio
             </p>
-            <p className="text-white text-sm">{author.bio}</p>
+            <p className="text-gray-300 text-sm">{author.bio}</p>
           </div>
         )}
 

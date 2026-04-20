@@ -24,7 +24,7 @@ import AuthorCard from "@/components/AuthorCard";
 export type Tone = {
   id: string;
   title?: string;
-  description?: string;
+  shortDescription?: string;
   genres?: string[];
   instruments?: string[];
   image?: string;
@@ -190,7 +190,7 @@ export default function UserProfilePage() {
       </div>
 
       {/* MAIN LAYOUT */}
-      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-8">
+      <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-6">
 
         {/* LEFT SIDE - AUTHOR CARD */}
         <div className="w-full md:w-[20%]">
