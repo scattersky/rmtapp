@@ -482,7 +482,7 @@ export default function ToneFeed() {
         </div>
       </div>
 
-      <ScrollToTop smooth className="bg-[#42b27c]" component={<FaArrowUp />} />
+      <ScrollToTop smooth color="#42b27c" style={{backgroundColor: "#42b27c"}} className="bg-[#42b27c]" component={<FaArrowUp className='mx-auto text-2xl' />} />
     </div>
   );
 }

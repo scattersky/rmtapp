@@ -32,6 +32,8 @@ import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 
 import AuthorCard from "@/components/AuthorCard";
 import {Collapse} from "react-collapse";
+import {FaArrowUp} from "react-icons/fa6";
+import ScrollToTop from "react-scroll-to-top";
 
 export type Tone = {
   id: string;
@@ -492,6 +494,7 @@ export default function SingleTonePage() {
 
 
         </div>
+      <ScrollToTop smooth color="#42b27c" style={{backgroundColor: "#42b27c"}} className="bg-[#42b27c]" component={<FaArrowUp className='mx-auto text-2xl' />} />
       </div>
 
   );

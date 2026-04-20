@@ -132,3 +132,11 @@
   }
 }
 
+.p-multiselect:focus,
+select:focus,
+input:focus,
+textarea:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #53A870 !important; /* your green */
+}
+

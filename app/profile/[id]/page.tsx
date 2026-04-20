@@ -20,6 +20,8 @@ import { useAuth } from "@/context/AuthContext";
 import { Audio } from "react-loader-spinner";
 import MusicListCard from "@/components/MusicListCard";
 import AuthorCard from "@/components/AuthorCard";
+import {FaArrowUp} from "react-icons/fa6";
+import ScrollToTop from "react-scroll-to-top";
 
 export type Tone = {
   id: string;
@@ -229,6 +231,7 @@ export default function UserProfilePage() {
 
         </div>
       </div>
+      <ScrollToTop smooth color="#42b27c" style={{backgroundColor: "#42b27c"}} className="bg-[#42b27c]" component={<FaArrowUp className='mx-auto text-2xl' />} />
     </div>
   );
 }

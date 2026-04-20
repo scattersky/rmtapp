@@ -19,7 +19,7 @@ import {
 
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-
+import { sendPasswordResetEmail } from "firebase/auth";
 /* ---------------- TYPES ---------------- */
 
 type RegisterData = {
@@ -43,7 +43,7 @@ type AuthContextType = {
     user: User | null;
     userData: any | null;
     loading: boolean;
-
+    resetPassword: (email: string) => Promise<void>;
     register: (data: RegisterData) => Promise<void>;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -93,6 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => unsub();
     }, []);
 
+    const resetPassword = async (email: string) => {
+        await sendPasswordResetEmail(auth, email);
+    };
     /* ---------------- AUTH METHODS ---------------- */
 
     const register = async (data: RegisterData) => {
@@ -134,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             register,
             login,
             logout,
+            resetPassword
         }}
       >
           {children}

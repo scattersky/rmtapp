@@ -75,16 +75,15 @@ export default function MusicListCard({
   const isOwner = user && post && user.uid === post.createdBy;
   return (
     <div className="relative border rounded-3xl mb-[40px] ">
-      {/*<GlowingEffect*/}
-      {/*  blur={0}*/}
-      {/*  borderWidth={3}*/}
-      {/*  spread={80}*/}
-      {/*  glow={true}*/}
-      {/*  disabled={false}*/}
-      {/*  proximity={64}*/}
-      {/*  inactiveZone={0.01}*/}
-      {/*/>*/}
-      <CometCard>
+      <GlowingEffect
+        blur={0}
+        borderWidth={3}
+        spread={80}
+        glow={true}
+        disabled={false}
+        proximity={64}
+        inactiveZone={0.01}
+      />
     <div className=" flex flex-col gap-5  px-[20px] pt-[20px] pb-[5px] rounded-3xl border  border-white/10 bg-[#1a1a1a]">
 
       {/* UPPER */}
@@ -253,8 +252,6 @@ export default function MusicListCard({
 
 
     </div>
-      </CometCard>
-      
     </div>
 
   );

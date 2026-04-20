@@ -55,19 +55,36 @@ export default function Header() {
             >
               Contact
             </a>
+            {userData && (
             <a
               href='/upload'
               className='block text-white uppercase text-[16px] hover:text-[#3FE297]'
             >
               Upload
             </a>
+              )}
+            {!userData && (
+              <a
+                href='/register'
+                className='block text-white uppercase text-[16px] hover:text-[#3FE297]'
+              >
+                Register
+              </a>
+            )}
           </div>
-          <div className='flex items-center justify-center'>
-            <img
-              src={userData?.image || "https://ratemytone.com/wp-content/uploads/2026/04/author_temp_image.webp"}
-              className='w-full max-w-[50px] rounded-full'
-            />
-          </div>
+          {userData && (
+            <div className='flex items-center justify-center'>
+              <Link
+                href={`/profile/${userData?.uid}`}
+              >
+                <img
+                  src={userData?.image || "https://ratemytone.com/wp-content/uploads/2026/04/author_default_avatar.webp"}
+                  className='w-full max-w-[50px] rounded-full'
+                />
+              </Link>
+            </div>
+          )}
+          {userData && (
           <div className='flex items-center justify-center'>
             <Link
               href={{
@@ -80,6 +97,22 @@ export default function Header() {
               </div>
             </Link>
           </div>
+            )}
+
+          {!userData && (
+            <div className='flex items-center justify-center'>
+              <Link
+                href={{
+                  pathname: '/login',
+                }}
+              >
+
+                <div className='block px-5 py-2 text-white uppercase text-[16px] cursor-pointer rounded-full bg-[#42b27c] font-normal'>
+                  Login
+                </div>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
