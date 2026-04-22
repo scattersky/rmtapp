@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 import Link from "next/link";
 
 
@@ -25,6 +25,9 @@ import { Audio } from "react-loader-spinner";
 
 import AuthorCard from "@/components/AuthorCard";
 import {Tooltip} from "react-tooltip";
+import EditProfilePage from "@/components/EditProfilePage";
+import FavoriteTones from "@/components/FavoriteTones";
+
 
 export type Tone = {
   id: string;
@@ -56,6 +59,22 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+
+  const [panelTitle, setPanelTitle] = useState("Edit Profile");
+  const [panelEditProfileVisible, setPanelEditProfileVisible] = useState(true);
+  const [panelFavoritesVisible, setPanelFavoritesVisible] = useState(false);
+
+  const showPanelEditProfile = () => {
+    setPanelTitle("Edit Profile");
+    setPanelEditProfileVisible(true);
+    setPanelFavoritesVisible(false);
+  }
+  const showPanelFavorites = () => {
+    setPanelTitle("Favorite Tones");
+    setPanelFavoritesVisible(true);
+    setPanelEditProfileVisible(false);
+  }
 
 
   // 🔥 FETCH CURRENT USER
@@ -76,7 +95,9 @@ export default function DashboardPage() {
     fetchUser();
   }, [user]);
 
-
+const goToToneFeed = () => {
+  router.push("/");
+}
 
 
 
@@ -96,7 +117,7 @@ export default function DashboardPage() {
       <div className='h-25 flex justify-between items-center  bg-[#141414] border-b-[3px] border-white'>
         <div className='mx-auto w-full max-w-341.5 p-4'>
           <h1 className='text-white text-3xl font-bold uppercase'>
-            Dashboard
+            Dashboard<span className='font-normal text-lg block mb-0'>{panelTitle}</span>
           </h1>
         </div>
       </div>
@@ -168,16 +189,25 @@ export default function DashboardPage() {
 
             {/*DASHBOARD BTNS*/}
             <div className="flex flex-col gap-4 w-full mt-6">
-              <button className="w-full py-1 border-[1.5px] border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button
+                className="w-full py-1 border-[1.5px] border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400"
+                onClick={showPanelEditProfile}
+              >
                 Edit Profile
               </button>
-              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button
+                className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400"
+                onClick={showPanelFavorites}
+              >
                 My Favorites
               </button>
               <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
                 Reviews
               </button>
-              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button
+                className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400"
+                onClick={goToToneFeed}
+              >
                 Tone Feed
               </button>
               <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#910106] hover:border-[#910106] transition duration-400">
@@ -189,12 +219,16 @@ export default function DashboardPage() {
         </div>
         <div className="w-full md:w-[80%]">
           {/* MAIN CARD */}
-          <div className="px-8 py-6 mb-6 flex flex-col md:flex-row gap-6 rounded-3xl border border-white/20 bg-[#1a1a1a]">
-            <h2 className='text-white text-2xl font-[500] '>
-              Edit Profile
-            </h2>
 
-          </div>
+          {panelEditProfileVisible &&
+              <div className="px-8 py-10 mb-6 flex flex-col gap-6 rounded-3xl border border-white/20 bg-[#1a1a1a] w-full">
+                  <EditProfilePage/>
+              </div>
+          }
+
+          {panelFavoritesVisible &&
+              <FavoriteTones/>
+          }
         </div>
 
 

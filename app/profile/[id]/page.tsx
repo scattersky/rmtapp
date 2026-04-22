@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -22,6 +22,7 @@ import MusicListCard from "@/components/MusicListCard";
 import AuthorCard from "@/components/AuthorCard";
 import {FaArrowUp} from "react-icons/fa6";
 import ScrollToTop from "react-scroll-to-top";
+import {IoIosSkipBackward} from "react-icons/io";
 
 export type Tone = {
   id: string;
@@ -47,6 +48,7 @@ export default function UserProfilePage() {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
   const [userReviewsMap, setUserReviewsMap] = useState<Record<string, boolean>>({});
+  const router = useRouter();
 
   // 🔥 FETCH USER INFO
   useEffect(() => {
@@ -166,6 +168,10 @@ export default function UserProfilePage() {
     setReviewRating(0);
   };
 
+  const goBack = () => {
+    router.back();
+  }
+
 
   if (loading || authLoading) {
     return (
@@ -188,6 +194,13 @@ export default function UserProfilePage() {
           <h1 className="text-3xl font-bold uppercase">
             @{userData.username}
           </h1>
+          <button
+            className='text-[#42b27c] text-sm mt-1 cursor-pointer flex items-center gap-2'
+            onClick={goBack}
+          >
+            <IoIosSkipBackward size={20}/>
+            <span className="font-medium ">Go Back</span>
+          </button>
         </div>
       </div>
 

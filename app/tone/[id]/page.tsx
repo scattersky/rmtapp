@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 import Link from "next/link";
+import { IoIosSkipBackward } from "react-icons/io";
 
 import { TbArrowBadgeRightFilled } from "react-icons/tb";
 
@@ -73,6 +74,8 @@ export default function SingleTonePage() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [userReviewsMap, setUserReviewsMap] = useState<Record<string, boolean>>({});
   const [hasUserReviewed, setHasUserReviewed] = useState(false);
+
+  const router = useRouter();
 
   // 🔥 FETCH TONE + AUTHOR
   useEffect(() => {
@@ -226,6 +229,9 @@ export default function SingleTonePage() {
   };
 
 
+  const goBack = () => {
+    router.back();
+  }
 
   // ⏳ LOADING
   if (loading || authLoading || reviewLoading) {
@@ -252,7 +258,15 @@ export default function SingleTonePage() {
         <div className='mx-auto w-full max-w-341.5 p-4'>
           <h1 className='text-white text-3xl font-bold uppercase'>
             {tone.title}
+
           </h1>
+          <button
+            className='text-[#42b27c] text-sm mt-1 cursor-pointer flex items-center gap-2'
+            onClick={goBack}
+          >
+            <IoIosSkipBackward size={20}/>
+            <span className="font-medium ">Go Back</span>
+          </button>
         </div>
       </div>
       <div className="max-w-[1366px] mx-auto px-4 pb-6 pt-12 flex gap-6">

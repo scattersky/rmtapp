@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import {IoIosSkipBackward} from "react-icons/io";
 
 export default function LoginPage() {
   const { login, resetPassword } = useAuth();
@@ -43,6 +44,10 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  const goBack = () => {
+    router.back();
+  }
+
   return (
     <>
       <div className='h-25 flex justify-between items-center  bg-[#141414] border-b-[3px] border-white'>
@@ -50,6 +55,13 @@ export default function LoginPage() {
           <h1 className='text-white text-3xl font-bold uppercase'>
           Rate My Tone
           </h1>
+          <button
+            className='text-[#42b27c] text-sm mt-1 cursor-pointer flex items-center gap-2'
+            onClick={goBack}
+          >
+            <IoIosSkipBackward size={20}/>
+            <span className="font-medium ">Go Back</span>
+          </button>
         </div>
       </div>
       <div className="max-w-md w-full mx-auto flex flex-col justify-center items-center h-[80vh] gap-4">
