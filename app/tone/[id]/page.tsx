@@ -35,6 +35,7 @@ import AuthorCard from "@/components/AuthorCard";
 import {Collapse} from "react-collapse";
 import {FaArrowUp} from "react-icons/fa6";
 import ScrollToTop from "react-scroll-to-top";
+import moment from "moment/moment";
 
 export type Tone = {
   id: string;
@@ -474,7 +475,8 @@ export default function SingleTonePage() {
 
             {/* REVIEW LIST */}
             {reviews.map((review) => (
-              <div key={review.id} className="mt-4 border-t pt-3 flex gap-3 items-start">
+              <div key={review.id} className="">
+              <div className="mt-4 border-t pt-3 flex gap-3 items-start">
 
                 {/* USER IMAGE */}
                 <img
@@ -497,11 +499,31 @@ export default function SingleTonePage() {
                   <p>{review.text}</p>
 
                   <span className="text-sm text-gray-400">
-        {review.userName}
-      </span>
+                    {review.userName}
+                  </span>
                 </div>
 
               </div>
+                {review.replyText && (
+                    <div className="bg-[#2a2a2a] p-3 rounded-md flex gap-3 mt-4 ml-10">
+                      <img
+                        src={review.replyUserImage}
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <div>
+                        <p className="text-xs mb-2  tracking-widest text-gray-400">
+                          {review.replyUserName}
+                          {" "} - {" "}
+                          {review.replyCreatedAt
+                            ? moment(review.replyCreatedAt.toDate()).format("MMM D, YYYY")
+                            : ""}
+                        </p>
+                        <p>{review.replyText}</p>
+
+                      </div>
+                    </div>
+                  )}
+                  </div>
             ))}
           </div>
         </div>

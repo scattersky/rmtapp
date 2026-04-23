@@ -27,6 +27,7 @@ import AuthorCard from "@/components/AuthorCard";
 import {Tooltip} from "react-tooltip";
 import EditProfilePage from "@/components/EditProfilePage";
 import FavoriteTones from "@/components/FavoriteTones";
+import ReviewsDashboard from "@/components/ReviewsDashboard";
 
 
 export type Tone = {
@@ -64,15 +65,24 @@ export default function DashboardPage() {
   const [panelTitle, setPanelTitle] = useState("Edit Profile");
   const [panelEditProfileVisible, setPanelEditProfileVisible] = useState(true);
   const [panelFavoritesVisible, setPanelFavoritesVisible] = useState(false);
+  const [panelReviewsVisible, setPanelReviewsVisible] = useState(false);
 
   const showPanelEditProfile = () => {
     setPanelTitle("Edit Profile");
     setPanelEditProfileVisible(true);
     setPanelFavoritesVisible(false);
+    setPanelReviewsVisible(false);
   }
   const showPanelFavorites = () => {
     setPanelTitle("Favorite Tones");
     setPanelFavoritesVisible(true);
+    setPanelEditProfileVisible(false);
+    setPanelReviewsVisible(false);
+  }
+  const showPanelReviews = () => {
+    setPanelTitle("Reviews");
+    setPanelReviewsVisible(true);
+    setPanelFavoritesVisible(false);
     setPanelEditProfileVisible(false);
   }
 
@@ -190,18 +200,27 @@ const goToToneFeed = () => {
             {/*DASHBOARD BTNS*/}
             <div className="flex flex-col gap-4 w-full mt-6">
               <button
-                className="w-full py-1 border-[1.5px] border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400"
+                className={`w-full py-1 border-[1.5px]  rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
+                  panelEditProfileVisible ? "bg-[#42b27c] border-[#42b27c]" : "border-gray-300"
+                }`}
                 onClick={showPanelEditProfile}
               >
                 Edit Profile
               </button>
               <button
-                className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400"
+                className={`w-full py-1 border-[1.5px]  rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
+                  panelFavoritesVisible ? "bg-[#42b27c] border-[#42b27c]" : "border-gray-300"
+                }`}
                 onClick={showPanelFavorites}
               >
                 My Favorites
               </button>
-              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400">
+              <button
+                className={`w-full py-1 border-[1.5px]  rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
+                  panelReviewsVisible ? "bg-[#42b27c] border-[#42b27c]" : "border-gray-300"
+                }`}
+                onClick={showPanelReviews}
+              >
                 Reviews
               </button>
               <button
@@ -228,6 +247,10 @@ const goToToneFeed = () => {
 
           {panelFavoritesVisible &&
               <FavoriteTones/>
+          }
+
+          {panelReviewsVisible &&
+             <ReviewsDashboard />
           }
         </div>
 

@@ -193,7 +193,7 @@ export default function EditProfilePage() {
                   value={form.firstName}
                   placeholder="First Name"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("firstName") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("firstName") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -209,7 +209,7 @@ export default function EditProfilePage() {
                   value={form.lastName}
                   placeholder="Last Name"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("lastName") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("lastName") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -227,7 +227,7 @@ export default function EditProfilePage() {
                   value={form.username}
                   placeholder="Username (Display Name)"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("username") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("username") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -245,7 +245,7 @@ export default function EditProfilePage() {
                   value={form.city}
                   placeholder="City"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("city") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("city") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -261,7 +261,7 @@ export default function EditProfilePage() {
                   value={form.state}
                   placeholder="State / Province"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("state") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("state") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -277,7 +277,7 @@ export default function EditProfilePage() {
                   value={form.country}
                   placeholder="Country"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("country") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("country") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -312,7 +312,7 @@ export default function EditProfilePage() {
                   label: { style: { backgroundColor: "#424242", border: "none", borderRadius: "10px" } },
                   labelContainer: { style: { backgroundColor: "#424242", border: "none", borderRadius: "10px" } },
                   trigger: { style: { backgroundColor: "#000" } },
-                  token: { style: { backgroundColor: "#53A870", border: "none", borderRadius: "10px", marginTop: 1, marginBottom: 1 } },
+                  token: { style: { backgroundColor: "#42B27B", border: "none", borderRadius: "10px", marginTop: 1, marginBottom: 1 } },
                   tokenLabel: { style: { color: "#FFF", fontSize: "14px" } },
                   removeTokenIcon: { style: { color: "#FFF" } }
                 }}
@@ -330,7 +330,7 @@ export default function EditProfilePage() {
                 placeholder="Short bio..."
                 rows={6}
                 className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                  isChanged("bio") ? "ring-2 ring-[#53A870]" : ""
+                  isChanged("bio") ? "ring-2 ring-[#42B27B]" : ""
                 }`}
                 onChange={handleChange}
               />
@@ -360,7 +360,7 @@ export default function EditProfilePage() {
                   value={form.youtube}
                   placeholder="YouTube URL"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("youtube") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("youtube") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -376,7 +376,7 @@ export default function EditProfilePage() {
                   value={form.instagram}
                   placeholder="Instagram URL"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("instagram") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("instagram") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -394,7 +394,7 @@ export default function EditProfilePage() {
                   value={form.soundcloud}
                   placeholder="SoundCloud URL"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("soundcloud") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("soundcloud") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -410,7 +410,7 @@ export default function EditProfilePage() {
                   value={form.spotify}
                   placeholder="Spotify URL"
                   className={`bg-[#424242] p-3 text-white placeholder:text-white rounded-md w-full mb-2 ${
-                    isChanged("spotify") ? "ring-2 ring-[#53A870]" : ""
+                    isChanged("spotify") ? "ring-2 ring-[#42B27B]" : ""
                   }`}
                   onChange={handleChange}
                 />
@@ -421,7 +421,7 @@ export default function EditProfilePage() {
 
         {/* BUTTON */}
         <button
-          className="w-1/2 block px-4 py-2 mx-auto mt-10 bg-[#53A870] text-white rounded-md"
+          className="w-1/2 block px-4 py-2 mx-auto mt-10 bg-[#42B27B] text-white rounded-md"
           onClick={handleUpdate}
         >
           Save Changes
