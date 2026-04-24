@@ -100,22 +100,19 @@ export default function DashboardPage() {
     setPanelEditProfileVisible(false);
   }
 
-
-  // 🔥 FETCH CURRENT USER
-  useEffect(() => {
+  const fetchUser = async () => {
     if (!user) return;
 
-    const fetchUser = async () => {
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
 
-      if (snap.exists()) {
-        const data = snap.data();
-        setUserData(data);
-        setLoading(false)
-      }
-    };
-
+    if (snap.exists()) {
+      setUserData(snap.data());
+      setLoading(false);
+    }
+  };
+  //  FETCH CURRENT USER
+  useEffect(() => {
     fetchUser();
   }, [user]);
 
@@ -274,7 +271,10 @@ const goToToneFeed = () => {
 
           {panelEditProfileVisible &&
               <div className="px-8 py-10 mb-6 flex flex-col gap-6 rounded-3xl border border-white/20 bg-[#1a1a1a] w-full">
-                  <EditProfilePage/>
+                  <EditProfilePage
+                      userData={userData}
+                      refreshUser={fetchUser}
+                  />
               </div>
           }
 

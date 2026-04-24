@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import { useRouter } from "next/navigation";
 import {
   collection,
@@ -16,6 +16,13 @@ import { MultiSelect } from "primereact/multiselect";
 import {PiSoundcloudLogoFill, PiSpotifyLogoFill, PiYoutubeLogoFill} from "react-icons/pi";
 import {AiFillInstagram} from "react-icons/ai";
 
+import { updateProfile } from "firebase/auth";
+
+type EditProfileProps = {
+  userData: any;
+  refreshUser: () => Promise<void>;
+};
+
 // ✅ TYPE
 type FormData = {
   firstName: string;
@@ -30,14 +37,23 @@ type FormData = {
   instagram: string;
   soundcloud: string;
   spotify: string;
+  image: string;
 };
 
-export default function EditProfilePage() {
+export default function EditProfilePage({
+                                          userData,
+                                          refreshUser,
+                                        }: EditProfileProps) {
   const router = useRouter();
 
   const [genres, setGenres] = useState<any[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [originalData, setOriginalData] = useState<FormData | null>(null);
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [form, setForm] = useState<FormData>({
     firstName: "",
@@ -52,6 +68,7 @@ export default function EditProfilePage() {
     instagram: "",
     soundcloud: "",
     spotify: "",
+    image: ""
   });
 
   // 🔥 FETCH GENRES
@@ -95,6 +112,7 @@ export default function EditProfilePage() {
           instagram: data.instagram || "",
           soundcloud: data.soundcloud || "",
           spotify: data.spotify || "",
+          image: ""
         };
 
         setForm(hydrated);
@@ -139,28 +157,69 @@ export default function EditProfilePage() {
     const user = auth.currentUser;
     if (!user || !originalData) return;
 
-    const updates: Partial<FormData> = {};
-
-    for (const key in form) {
-      const typedKey = key as keyof FormData;
-
-      const currentValue = form[typedKey];
-      const originalValue = originalData[typedKey];
-
-      if (JSON.stringify(currentValue) !== JSON.stringify(originalValue)) {
-        (updates as Record<keyof FormData, FormData[keyof FormData]>)[typedKey] = currentValue;
-      }
-    }
-
-    if (Object.keys(updates).length === 0) {
-      alert("No changes made");
-      return;
-    }
+    // 🔧 allow dynamic keys (fixes TS issues cleanly)
+    const updates: Record<string, any> = {};
 
     try {
+      // =========================
+      // 🖼️ HANDLE IMAGE UPLOAD
+      // =========================
+      if (imageFile) {
+        const imageUrl = await uploadFile(imageFile);
+
+        updates.image = imageUrl;
+
+        // 🔥 optional but recommended: sync Firebase Auth profile
+        await updateProfile(user, {
+          photoURL: imageUrl,
+        });
+      }
+
+      // =========================
+      // 🧠 EXISTING DIFF LOGIC
+      // =========================
+      for (const key in form) {
+        const typedKey = key as keyof FormData;
+
+        const currentValue = form[typedKey];
+        const originalValue = originalData[typedKey];
+
+        if (JSON.stringify(currentValue) !== JSON.stringify(originalValue)) {
+          updates[typedKey] = currentValue;
+        }
+      }
+
+      // =========================
+      // 🚫 NOTHING CHANGED
+      // =========================
+      if (Object.keys(updates).length === 0) {
+        alert("No changes made");
+        return;
+      }
+
+      // =========================
+      // 💾 UPDATE FIRESTORE
+      // =========================
+
       await updateDoc(doc(db, "users", user.uid), updates);
+
+      await refreshUser();
+      setImageFile(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       alert("Profile updated!");
-      setOriginalData(form);
+
+      // 🔄 sync local state
+      setOriginalData({
+        ...form,
+        ...(updates.image ? { image: updates.image } : {}),
+      });
+
+      // 🧹 clear temp image state
+      setImageFile(null);
+
     } catch (err: any) {
       alert(err.message);
     }
@@ -172,6 +231,19 @@ export default function EditProfilePage() {
     return JSON.stringify(form[key]) !== JSON.stringify(originalData[key]);
   };
 
+  const uploadFile = async (file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+
+    const res = await fetch("https://ratemytone.com/upload.php", {
+      method: "POST",
+      body: fd,
+    });
+
+    const data = await res.json();
+    return data.url;
+  };
+
   return (
     <>
 
@@ -180,7 +252,43 @@ export default function EditProfilePage() {
 
         {/* BASIC INFO */}
         <div className="p-0 mb-12 flex flex-col w-full gap-6">
-          <h2 className="text-white text-2xl font-bold">Basic Info</h2>
+          <p className="text-sm text-gray-400">Note: Only fields that have been edited will be saved.</p>
+          <h2 className="text-white text-2xl font-bold">Profile Image</h2>
+          <div className="flex items-center gap-8">
+            <div className='w-1/2'>
+              <p className="text-xs mb-2 uppercase tracking-widest text-gray-400">
+                Image
+              </p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                className="bg-[#424242] p-3 rounded-md file:border file:border-[#42B27B] file:py-2 file:px-4 file:rounded-md file:mr-4 w-full"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setImageFile(file);
+
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    setImagePreview(url);
+                  }
+                }}
+              />
+            </div>
+            <div className='w-1/2'>
+
+              {(imagePreview) && (
+                <img
+                  src={imagePreview}
+                  alt="Profile Preview"
+                  className="w-24 h-24 mt-2 object-cover object-center rounded-full border border-white/10"
+                />
+              )}
+            </div>
+          </div>
+
+
+          <h2 className="text-white text-2xl font-bold mt-6">Basic Info</h2>
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3 w-full">
