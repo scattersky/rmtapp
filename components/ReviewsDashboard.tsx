@@ -149,7 +149,7 @@ export default function ReviewsDashboard() {
         <button
           onClick={() => setMode("received")}
           className={`px-4 py-2 rounded-md ${
-            mode === "received" ? "bg-[#53A870]" : "bg-gray-600"
+            mode === "received" ? "bg-[#42B27B]" : "bg-gray-600"
           }`}
         >
           Reviews Received
@@ -158,7 +158,7 @@ export default function ReviewsDashboard() {
         <button
           onClick={() => setMode("given")}
           className={`px-4 py-2 rounded-md ${
-            mode === "given" ? "bg-[#53A870]" : "bg-gray-600"
+            mode === "given" ? "bg-[#42B27B]" : "bg-gray-600"
           }`}
         >
           Reviews Given

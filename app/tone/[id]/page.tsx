@@ -53,7 +53,7 @@ export type Tone = {
 
   music_url?: string;
   review_count?: number;
-  average_rating?: number;
+  average_rating: number;
 };
 
 export default function SingleTonePage() {
@@ -342,7 +342,7 @@ export default function SingleTonePage() {
 
                 <StarRatings
                   // rating={post.average_rating || 0}
-                  rating={3}
+                  rating={tone.average_rating}
                   starEmptyColor="#686868"
                   starRatedColor="white"
                   numberOfStars={5}

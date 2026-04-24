@@ -28,6 +28,9 @@ import {Tooltip} from "react-tooltip";
 import EditProfilePage from "@/components/EditProfilePage";
 import FavoriteTones from "@/components/FavoriteTones";
 import ReviewsDashboard from "@/components/ReviewsDashboard";
+import ChangePassword from "@/components/ChangePassword";
+import ChangeEmail from "@/components/AccountSettings";
+import AccountSettings from "@/components/AccountSettings";
 
 
 export type Tone = {
@@ -56,7 +59,7 @@ const badgeToneFavsRecieved =
 
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,23 +69,34 @@ export default function DashboardPage() {
   const [panelEditProfileVisible, setPanelEditProfileVisible] = useState(true);
   const [panelFavoritesVisible, setPanelFavoritesVisible] = useState(false);
   const [panelReviewsVisible, setPanelReviewsVisible] = useState(false);
+  const [panelSettingsVisible, setPanelSettingsVisible] = useState(false);
 
   const showPanelEditProfile = () => {
     setPanelTitle("Edit Profile");
     setPanelEditProfileVisible(true);
     setPanelFavoritesVisible(false);
     setPanelReviewsVisible(false);
+    setPanelSettingsVisible(false);
   }
   const showPanelFavorites = () => {
     setPanelTitle("Favorite Tones");
     setPanelFavoritesVisible(true);
     setPanelEditProfileVisible(false);
     setPanelReviewsVisible(false);
+    setPanelSettingsVisible(false);
   }
   const showPanelReviews = () => {
     setPanelTitle("Reviews");
     setPanelReviewsVisible(true);
     setPanelFavoritesVisible(false);
+    setPanelEditProfileVisible(false);
+    setPanelSettingsVisible(false);
+  }
+  const showPanelSettings = () => {
+    setPanelTitle("Settings");
+    setPanelSettingsVisible(true);
+    setPanelFavoritesVisible(false);
+    setPanelReviewsVisible(false);
     setPanelEditProfileVisible(false);
   }
 
@@ -109,6 +123,14 @@ const goToToneFeed = () => {
   router.push("/");
 }
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login"); // redirect after logout
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
 
   // ⏳ LOADING
@@ -200,7 +222,7 @@ const goToToneFeed = () => {
             {/*DASHBOARD BTNS*/}
             <div className="flex flex-col gap-4 w-full mt-6">
               <button
-                className={`w-full py-1 border-[1.5px]  rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
+                className={`w-full py-1 border-[1.5px]  rounded-md cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
                   panelEditProfileVisible ? "bg-[#42b27c] border-[#42b27c]" : "border-gray-300"
                 }`}
                 onClick={showPanelEditProfile}
@@ -208,7 +230,7 @@ const goToToneFeed = () => {
                 Edit Profile
               </button>
               <button
-                className={`w-full py-1 border-[1.5px]  rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
+                className={`w-full py-1 border-[1.5px]  rounded-md cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
                   panelFavoritesVisible ? "bg-[#42b27c] border-[#42b27c]" : "border-gray-300"
                 }`}
                 onClick={showPanelFavorites}
@@ -216,7 +238,7 @@ const goToToneFeed = () => {
                 My Favorites
               </button>
               <button
-                className={`w-full py-1 border-[1.5px]  rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
+                className={`w-full py-1 border-[1.5px]  rounded-md cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
                   panelReviewsVisible ? "bg-[#42b27c] border-[#42b27c]" : "border-gray-300"
                 }`}
                 onClick={showPanelReviews}
@@ -224,12 +246,23 @@ const goToToneFeed = () => {
                 Reviews
               </button>
               <button
-                className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400"
+                className="w-full py-1 border-[1.5px]  border-gray-300 rounded-md cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400"
                 onClick={goToToneFeed}
               >
                 Tone Feed
               </button>
-              <button  className="w-full py-1 border-[1.5px]  border-gray-300 rounded-full cursor-pointer hover:bg-[#910106] hover:border-[#910106] transition duration-400">
+              <button
+                className={`w-full py-1 border-[1.5px]  rounded-md cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c] transition duration-400 ${
+                  panelSettingsVisible ? "bg-[#42b27c] border-[#42b27c]" : "border-gray-300"
+                }`}
+                onClick={showPanelSettings}
+              >
+                Settings
+              </button>
+              <button
+                className="w-full py-1 border-[1.5px]  border-gray-300 rounded-md cursor-pointer hover:bg-[#910106] hover:border-[#910106] transition duration-400"
+                onClick={handleLogout}
+              >
                 Logout
               </button>
             </div>
@@ -251,6 +284,9 @@ const goToToneFeed = () => {
 
           {panelReviewsVisible &&
              <ReviewsDashboard />
+          }
+          {panelSettingsVisible &&
+            <AccountSettings/>
           }
         </div>
 
