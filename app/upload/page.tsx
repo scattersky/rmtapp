@@ -168,7 +168,6 @@ export default function ToneUpload() {
                 <AudioWaveformPreview file={musicFile} />
               </div>
             </div>
-
           </div>
 
           {/* TITLE */}

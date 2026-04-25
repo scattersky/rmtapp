@@ -30,12 +30,14 @@ import StarRatings from 'react-star-ratings';
 import { SlideDown } from "react-slidedown";
 import { IoSend } from "react-icons/io5";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
+import { deleteDoc } from "firebase/firestore";
 
 import AuthorCard from "@/components/AuthorCard";
 import {Collapse} from "react-collapse";
 import {FaArrowUp} from "react-icons/fa6";
 import ScrollToTop from "react-scroll-to-top";
 import moment from "moment/moment";
+import EditToneModal from "@/components/EditToneModal";
 
 export type Tone = {
   id: string;
@@ -53,7 +55,7 @@ export type Tone = {
 
   music_url?: string;
   review_count?: number;
-  average_rating: number;
+  average_rating?: number;
 };
 
 export default function SingleTonePage() {
@@ -75,6 +77,9 @@ export default function SingleTonePage() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [userReviewsMap, setUserReviewsMap] = useState<Record<string, boolean>>({});
   const [hasUserReviewed, setHasUserReviewed] = useState(false);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const router = useRouter();
 
@@ -234,6 +239,40 @@ export default function SingleTonePage() {
     router.back();
   }
 
+  // HANDLE DELETE TONE
+  const handleDeleteTone = async () => {
+    if (!tone) return;
+
+    try {
+      // 🔥 delete reviews tied to tone
+      const reviewsQuery = query(
+        collection(db, "reviews"),
+        where("toneId", "==", tone.id)
+      );
+
+      const reviewSnap = await getDocs(reviewsQuery);
+
+      const deletePromises = reviewSnap.docs.map((docSnap) =>
+        deleteDoc(doc(db, "reviews", docSnap.id))
+      );
+
+      await Promise.all(deletePromises);
+
+      // 🔥 delete tone itself
+      await deleteDoc(doc(db, "tones", tone.id));
+
+      // 🔥 optional: delete files from server (if you build API later)
+
+      alert("Tone deleted");
+
+      // 👉 redirect after delete
+      router.push("/");
+
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   // ⏳ LOADING
   if (loading || authLoading || reviewLoading) {
     return (
@@ -257,10 +296,29 @@ export default function SingleTonePage() {
     <div className="bg-[#141414] min-h-screen text-white">
       <div className='h-25 flex justify-between items-center  bg-[#141414] border-b-[3px] border-white'>
         <div className='mx-auto w-full max-w-341.5 p-4'>
-          <h1 className='text-white text-3xl font-bold uppercase'>
-            {tone.title}
+          <div className="flex items-center justify-between">
+            <h1 className='text-white text-3xl font-bold uppercase'>
+              {tone.title}
+            </h1>
 
-          </h1>
+            {isOwner && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsEditOpen(true)}
+                  className="bg-[#42b27c] text-white border-2 font-medium  px-4 py-1.5 rounded-md text-sm cursor-pointer"
+                >
+                  Edit Tone
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className=":text-white bg-red-600 border-2 font-medium px-4 py-1.5 rounded-md text-sm cursor-pointer"
+                >
+                  Delete Tone
+                </button>
+              </div>
+            )}
+          </div>
+
           <button
             className='text-[#42b27c] text-sm mt-1 cursor-pointer flex items-center gap-2'
             onClick={goBack}
@@ -342,7 +400,7 @@ export default function SingleTonePage() {
 
                 <StarRatings
                   // rating={post.average_rating || 0}
-                  rating={tone.average_rating}
+                  rating={tone.average_rating || 0}
                   starEmptyColor="#686868"
                   starRatedColor="white"
                   numberOfStars={5}
@@ -384,7 +442,7 @@ export default function SingleTonePage() {
               <p className="text-xs uppercase tracking-widest text-gray-400">
                 Signal Flow
               </p>
-              <div className="flex items-center gap-1 mt-3">
+              <div className="flex flex-wrap items-center gap-1 mt-3">
                 {signalFlow.map((item, index) => (
                   <React.Fragment key={index}>
                     <div className="py-1.5 px-4 border border-white rounded-md text-sm cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
@@ -434,7 +492,7 @@ export default function SingleTonePage() {
               ) : (
                 <div className="flex gap-4 bg-[#3a3a3a] p-3 rounded-full items-center mt-12">
                   <img
-                    src={author?.image}
+                    src={userData?.image}
                     className="h-[40px] w-[40px] rounded-full"
                     alt="user"
                   />
@@ -527,6 +585,48 @@ export default function SingleTonePage() {
             ))}
           </div>
         </div>
+
+        {isEditOpen && tone && (
+          <EditToneModal
+            tone={tone}
+            onClose={() => setIsEditOpen(false)}
+            onUpdated={async () => {
+              const snap = await getDoc(doc(db, "tones", tone.id));
+              if (snap.exists()) {
+                setTone({ id: snap.id, ...snap.data() });
+              }
+            }}
+          />
+        )}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div className="bg-[#1a1a1a] p-6 rounded-xl w-[400px] border border-white/10">
+              <h2 className="text-xl font-bold mb-4 text-white">
+                Delete Tone
+              </h2>
+
+              <p className="text-gray-400 mb-6">
+                Are you sure you want to delete this tone? This action cannot be undone.
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 border border-gray-400 rounded-md"
+                >
+                  No
+                </button>
+
+                <button
+                  onClick={handleDeleteTone}
+                  className="px-4 py-2 bg-red-600 rounded-md text-white"
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
 
         </div>

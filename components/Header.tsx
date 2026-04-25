@@ -75,29 +75,31 @@ export default function Header() {
           {userData && (
             <div className='flex items-center justify-center'>
               <Link
-                href={`/profile/${userData?.uid}`}
+                href={{
+                  pathname: '/dashboard',
+                }}
               >
-                <img
-                  src={userData?.image || "https://ratemytone.com/wp-content/uploads/2026/04/author_default_avatar.webp"}
-                  className='w-full max-w-[50px] rounded-full'
-                />
+
+                <div className='block px-4 py-1.5 text-white uppercase text-[15px] cursor-pointer rounded-md bg-[#42b27c] font-normal transition-transform duration-300 hover:scale-103'>
+                  Dashboard
+                </div>
               </Link>
             </div>
           )}
           {userData && (
-          <div className='flex items-center justify-center'>
-            <Link
-              href={{
-                pathname: '/dashboard',
-              }}
-            >
+            <div className='flex items-center justify-center relative'>
+              <Link
+                href={`/profile/${userData?.uid}`}
+              >
+                <img
+                  src={userData?.image || "https://ratemytone.com/wp-content/uploads/2026/04/author_default_avatar.webp"}
+                  className='w-full max-w-[45px] rounded-full transition-transform duration-300 hover:scale-109 border-3 border-gray-600'
+                />
+                <div className='bg-red-600 text-white p-0 rounded-full flex justify-center items-center leading-0 absolute top-0 right-0 h-5 w-5 font-bold text-xs'>2</div>
+              </Link>
+            </div>
+          )}
 
-              <div className='block px-5 py-2 text-white uppercase text-[16px] cursor-pointer rounded-full bg-[#42b27c] font-normal'>
-                Dashboard
-              </div>
-            </Link>
-          </div>
-            )}
 
           {!userData && (
             <div className='flex items-center justify-center'>
