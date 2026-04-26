@@ -81,6 +81,10 @@ export default function SingleTonePage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  const [signalFlowModulesMap, setSignalFlowModulesMap] = useState<
+    Record<string, { affiliateLink?: string }>
+  >({});
+
   const router = useRouter();
 
   // 🔥 FETCH TONE + AUTHOR
@@ -273,6 +277,37 @@ export default function SingleTonePage() {
     }
   };
 
+  useEffect(() => {
+    const fetchModules = async () => {
+      const snap = await getDocs(collection(db, "signalFlowModules"));
+
+      const map: Record<string, { affiliateLink?: string }> = {};
+
+      snap.docs.forEach((doc) => {
+        const data = doc.data();
+
+        // normalize ID (already lowercase + hyphens in your DB)
+        map[doc.id] = {
+          affiliateLink: data.affiliateLink || null,
+        };
+
+        // ALSO map by display name if you store it
+        if (data.name) {
+          map[data.name] = {
+            affiliateLink: data.affiliateLink || null,
+          };
+        }
+      });
+
+      setSignalFlowModulesMap(map);
+    };
+
+    fetchModules();
+  }, []);
+
+  const normalizeKey = (value: string) =>
+    value.toLowerCase().replace(/\s+/g, "-");
+
   // ⏳ LOADING
   if (loading || authLoading || reviewLoading) {
     return (
@@ -359,7 +394,7 @@ export default function SingleTonePage() {
 
 
             {/* DETAILS */}
-            <div className="flex flex-col justify-between w-full">
+            <div className="flex flex-col justify-start gap-2 w-full">
               {/*<div className="flex gap-2 justify-end flex-wrap">*/}
               {/*  {tone.genres?.map((genre) => (*/}
               {/*    <div key={genre} className="bg-[#8E8E8E] px-3 py-1 rounded-full">*/}
@@ -421,18 +456,46 @@ export default function SingleTonePage() {
                   sliderColor="#42b27c"
                 />
               </div>
-              {/* GENRES */}
-              <div className="mt-3">
-                <strong>Genres:</strong> {genres.join(", ")}
+
+              <div>
+                {/* GENRES */}
+                <div className='mb-4'>
+                  <p className="text-xs uppercase tracking-widest text-gray-400">
+                    Genres
+                  </p>
+                  <div className="mt-2 flex flex-row gap-2">
+                    {tone.genres?.map((genre) => (
+                      <div key={genre} className="bg-[#8E8E8E] px-3 py-1 rounded-full">
+                        {genre}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* INSTRUMENTS */}
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-gray-400">
+                    Instruments
+                  </p>
+                  <div className="mt-2 flex flex-row gap-2">
+                    {tone.instruments?.map((inst) => (
+                      <div key={inst} className="bg-[#42b27c] px-3 py-1 rounded-full">
+                        {inst}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              {/* INSTRUMENTS */}
-              <div>
-                <strong>Instruments:</strong> {instruments.join(", ")}
-              </div>
 
               {/* SHORT DESCRIPTION */}
-              <p className="mt-4 text-sm text-gray-300">{tone.shortDescription}</p>
+              <div className="mt-4">
+                <p className="text-xs uppercase tracking-widest text-gray-400">
+                  Overview
+                </p>
+                <p className="mt-1 text-md text-gray-300">{tone.shortDescription}</p>
+              </div>
+
             </div>
           </div>
 
@@ -443,16 +506,52 @@ export default function SingleTonePage() {
                 Signal Flow
               </p>
               <div className="flex flex-wrap items-center gap-1 mt-3">
-                {signalFlow.map((item, index) => (
-                  <React.Fragment key={index}>
+                {/*{signalFlow.map((item, index) => (*/}
+                {/*  <React.Fragment key={index}>*/}
+                {/*    <div className="py-1.5 px-4 border border-white rounded-md text-sm cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">*/}
+                {/*      {item}*/}
+                {/*    </div>*/}
+
+                {/*    /!* Add separator except for last item *!/*/}
+                {/*    {index < signalFlow.length - 1 && <span><TbArrowBadgeRightFilled className='text-[#42b27c] text-2xl' /></span>}*/}
+                {/*  </React.Fragment>*/}
+                {/*))}*/}
+                {signalFlow.map((item, index) => {
+                  const key = normalizeKey(item);
+
+                  const signalModule =
+                    signalFlowModulesMap[key] ||
+                    signalFlowModulesMap[item] ||
+                    signalFlowModulesMap[item.toLowerCase()];
+
+                  const content = (
                     <div className="py-1.5 px-4 border border-white rounded-md text-sm cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
                       {item}
                     </div>
+                  );
 
-                    {/* Add separator except for last item */}
-                    {index < signalFlow.length - 1 && <span><TbArrowBadgeRightFilled className='text-[#42b27c] text-2xl' /></span>}
-                  </React.Fragment>
-                ))}
+                  return (
+                    <React.Fragment key={index}>
+                      {signalModule?.affiliateLink ? (
+                        <a
+                          href={signalModule.affiliateLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {content}
+                        </a>
+                      ) : (
+                        content
+                      )}
+
+                      {index < signalFlow.length - 1 && (
+                        <span>
+          <TbArrowBadgeRightFilled className="text-[#42b27c] text-2xl" />
+        </span>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
 
               </div>
             </div>
