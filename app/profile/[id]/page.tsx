@@ -195,11 +195,11 @@ export default function UserProfilePage() {
             @{userData.username}
           </h1>
           <button
+            aria-label="Go back"
             className='text-[#42b27c] text-sm mt-1 cursor-pointer flex items-center gap-2'
             onClick={goBack}
           >
             <IoIosSkipBackward size={20}/>
-            <span className="font-medium ">Go Back</span>
           </button>
         </div>
       </div>

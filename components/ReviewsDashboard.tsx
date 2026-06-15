@@ -13,6 +13,7 @@ import { db, auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import StarRatings from "react-star-ratings";
 import moment from "moment";
+import Link from "next/link";
 
 export default function ReviewsDashboard() {
   const [user, setUser] = useState<any>(null);
@@ -176,34 +177,43 @@ export default function ReviewsDashboard() {
             key={review.id}
             className="p-5 rounded-2xl border border-white/20 bg-[#1a1a1a]"
           >
-            {/* REVIEW HEADER */}
-            <div className="flex items-start gap-3 mb-2">
-              <img
-                src={review.userImage}
-                className="w-10 h-10 rounded-full mt-2"
-              />
-              <div className="flex flex-col gap-2">
-                <StarRatings
-                  rating={review.rating}
-                  starEmptyColor="#686868"
-                  starRatedColor="white"
-                  numberOfStars={5}
-                  name="rating"
-                  starDimension="20px"
-                  starSpacing="2px"
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              {/* REVIEW HEADER */}
+              <div className="flex items-start gap-3 mb-2">
+                <img
+                  src={review.userImage}
+                  className="w-10 h-10 rounded-full mt-2"
                 />
-                {/* REVIEW TEXT */}
-                <p className="text-gray-300">{review.text}</p>
-                <p className="text-xs mb-2  tracking-widest text-gray-400">
-                  {review.userName}
-                  {" "} - {" "}
-                  {review.createdAt
-                    ? moment(review.createdAt.toDate()).format("MMM D, YYYY")
-                    : ""}
-                </p>
+                <div className="flex flex-col gap-2">
+                  <StarRatings
+                    rating={review.rating}
+                    starEmptyColor="#686868"
+                    starRatedColor="#f5b301"
+                    numberOfStars={5}
+                    name="rating"
+                    starDimension="20px"
+                    starSpacing="2px"
+                  />
+                  {/* REVIEW TEXT */}
+                  <p className="text-gray-300">{review.text}</p>
+                  <p className="text-xs mb-2  tracking-widest text-gray-400">
+                    {review.userName}
+                    {" "} - {" "}
+                    {review.createdAt
+                      ? moment(review.createdAt.toDate()).format("MMM D, YYYY")
+                      : ""}
+                  </p>
+                </div>
               </div>
 
-
+              {review.toneId && (
+                <Link
+                  href={`/tone/${review.toneId}`}
+                  className="shrink-0 self-start rounded-full border-[1.5px] border-gray-300 px-5 py-1.5 text-sm text-white transition-colors hover:border-[#42b27c] hover:bg-[#42b27c]"
+                >
+                  View Tone
+                </Link>
+              )}
             </div>
 
 

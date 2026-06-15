@@ -23,12 +23,9 @@ import {
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 
-import Header from "@/components/Header";
-
 import { Audio } from "react-loader-spinner";
 import { AudioPlayer } from "react-audio-play";
 import StarRatings from 'react-star-ratings';
-import { SlideDown } from "react-slidedown";
 import { IoSend } from "react-icons/io5";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 import { deleteDoc } from "firebase/firestore";
@@ -50,7 +47,7 @@ export type Tone = {
   signalFlow?: string[];
   image?: string;
   createdBy?: string;
-  createdAt?: any;
+  createdAt?: unknown;
   author_name?: string;
   author_image_url?: string;
 
@@ -59,14 +56,43 @@ export type Tone = {
   average_rating?: number;
 };
 
+type UserProfile = {
+  uid?: string;
+  username?: string;
+  image?: string;
+  bio?: string;
+  favorites?: string[];
+  favoriteGenres?: string[];
+  instagram?: string;
+  spotify?: string;
+  soundcloud?: string;
+  youtube?: string;
+};
+
+type Review = {
+  id: string;
+  toneId?: string;
+  userId?: string;
+  userName?: string;
+  userImage?: string;
+  text?: string;
+  rating?: number;
+  replyText?: string;
+  replyUserImage?: string;
+  replyUserName?: string;
+  replyCreatedAt?: {
+    toDate: () => Date;
+  };
+};
+
 export default function SingleTonePage() {
   const { id } = useParams();
   const { user, loading: authLoading } = useAuth();
 
   const [tone, setTone] = useState<Tone | null>(null);
-  const [author, setAuthor] = useState<any>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [userData, setUserData] = useState<any>(null);
+  const [author, setAuthor] = useState<UserProfile | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [userData, setUserData] = useState<UserProfile | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [reviewLoading, setReviewLoading] = useState(true);
@@ -76,7 +102,6 @@ export default function SingleTonePage() {
   const [reviewRating, setReviewRating] = useState(0);
 
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [userReviewsMap, setUserReviewsMap] = useState<Record<string, boolean>>({});
   const [hasUserReviewed, setHasUserReviewed] = useState(false);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -146,29 +171,29 @@ export default function SingleTonePage() {
 
   // CHECK IF USER HAS REVIEWED TONE
   useEffect(() => {
-    if (!user) return;
+    const currentToneId = Array.isArray(id) ? id[0] : id;
+
+    if (!user || !currentToneId) return;
 
     const fetchReviews = async () => {
       const snapshot = await getDocs(collection(db, "reviews"));
 
-      const map: Record<string, boolean> = {};
+      let userHasReviewedTone = false;
 
       snapshot.forEach((doc) => {
         const data = doc.data();
 
         // if current user reviewed this tone
-        if (data.userId === user.uid && data.toneId) {
-          map[data.toneId] = true;
-          setHasUserReviewed(true);
+        if (data.userId === user.uid && data.toneId === currentToneId) {
+          userHasReviewedTone = true;
         }
       });
 
-      setUserReviewsMap(map);
-
+      setHasUserReviewed(userHasReviewedTone);
     };
 
     fetchReviews();
-  }, [user]);
+  }, [user, id]);
 
   // 🔥 FETCH CURRENT USER
   useEffect(() => {
@@ -273,8 +298,8 @@ export default function SingleTonePage() {
       // 👉 redirect after delete
       router.push("/");
 
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Could not delete tone");
     }
   };
 
@@ -323,9 +348,10 @@ export default function SingleTonePage() {
   }
 
   // ✅ SAFE ARRAYS
-  const genres = tone.genres ?? [];
-  const signalFlow = tone.signalFlow ?? [];
-  const instruments = tone.instruments ?? [];
+  const signalFlow = (tone.signalFlow ?? []).filter(
+    (item): item is string => typeof item === "string" && item.trim().length > 0
+  );
+  const hasSignalFlow = signalFlow.length > 0;
   const isOwner = user && tone && user.uid === tone.createdBy;
   return (
 
@@ -347,7 +373,7 @@ export default function SingleTonePage() {
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className=":text-white bg-red-600 border-2 font-medium px-4 py-1.5 rounded-md text-sm cursor-pointer"
+                  className=":text-white border-red-800 hover:bg-red-800 border-2 font-medium px-4 py-1.5 rounded-md text-sm cursor-pointer"
                 >
                   Delete Tone
                 </button>
@@ -356,11 +382,11 @@ export default function SingleTonePage() {
           </div>
 
           <button
+            aria-label="Go back"
             className='text-[#42b27c] text-sm mt-1 cursor-pointer flex items-center gap-2'
             onClick={goBack}
           >
             <IoIosSkipBackward size={20}/>
-            <span className="font-medium ">Go Back</span>
           </button>
         </div>
       </div>
@@ -438,7 +464,7 @@ export default function SingleTonePage() {
                   // rating={post.average_rating || 0}
                   rating={tone.average_rating || 0}
                   starEmptyColor="#686868"
-                  starRatedColor="white"
+                  starRatedColor="#f5b301"
                   numberOfStars={5}
                   name='rating'
                   starDimension="22px"
@@ -502,61 +528,55 @@ export default function SingleTonePage() {
 
           {/* TONE DESCRIPTION */}
           <div className="p-5 mb-6 flex flex-col gap-6 rounded-3xl border border-white/20 bg-[#1a1a1a]">
-            <div>
-              <p className="text-xs uppercase tracking-widest text-gray-400">
-                Signal Flow
-              </p>
-              <div className="flex flex-wrap items-center gap-1 mt-3">
-                {/*{signalFlow.map((item, index) => (*/}
-                {/*  <React.Fragment key={index}>*/}
-                {/*    <div className="py-1.5 px-4 border border-white rounded-md text-sm cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">*/}
-                {/*      {item}*/}
-                {/*    </div>*/}
+            {hasSignalFlow && (
+              <div>
+                <p className="text-xs uppercase tracking-widest text-gray-400">
+                  Signal Flow
+                </p>
+                <div className="flex flex-wrap items-center gap-1 mt-3">
+                  {signalFlow.map((item, index) => {
+                    const key = normalizeKey(item);
 
-                {/*    /!* Add separator except for last item *!/*/}
-                {/*    {index < signalFlow.length - 1 && <span><TbArrowBadgeRightFilled className='text-[#42b27c] text-2xl' /></span>}*/}
-                {/*  </React.Fragment>*/}
-                {/*))}*/}
-                {signalFlow.map((item, index) => {
-                  const key = normalizeKey(item);
+                    const signalModule =
+                      signalFlowModulesMap[key] ||
+                      signalFlowModulesMap[item] ||
+                      signalFlowModulesMap[item.toLowerCase()];
 
-                  const signalModule =
-                    signalFlowModulesMap[key] ||
-                    signalFlowModulesMap[item] ||
-                    signalFlowModulesMap[item.toLowerCase()];
+                    const content = (
+                      <div className="flex gap-1 items-center justify-center py-1.5 px-4 border border-white rounded-md text-sm cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
+                        {item}
+                        {signalModule?.affiliateLink && (
+                          <RiExternalLinkLine color="#fff" />
+                        )}
+                      </div>
+                    );
 
-                  const content = (
-                    <div className="flex gap-1 items-center justify-center py-1.5 px-4 border border-white rounded-md text-sm cursor-pointer hover:bg-[#42b27c] hover:border-[#42b27c]">
-                      {item}{signalModule.affiliateLink && <RiExternalLinkLine  color="#fff"/>}
-                    </div>
-                  );
+                    return (
+                      <React.Fragment key={index}>
+                        {signalModule?.affiliateLink ? (
+                          <a
+                            href={signalModule.affiliateLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="transition-transform duration-300 hover:scale-105"
+                          >
+                            {content}
+                          </a>
+                        ) : (
+                          content
+                        )}
 
-                  return (
-                    <React.Fragment key={index}>
-                      {signalModule?.affiliateLink ? (
-                        <a
-                          href={signalModule.affiliateLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className=" transition-transform duration-300 hover:scale-105"
-                        >
-                          {content}
-                        </a>
-                      ) : (
-                        content
-                      )}
-
-                      {index < signalFlow.length - 1 && (
-                        <span>
-          <TbArrowBadgeRightFilled className="text-[#42b27c] text-2xl" />
-        </span>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-
+                        {index < signalFlow.length - 1 && (
+                          <span>
+                            <TbArrowBadgeRightFilled className="text-[#42b27c] text-2xl" />
+                          </span>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
               </div>
             </div>
+        )}
             <div>
               <p className="text-xs uppercase tracking-widest text-gray-400">
                 Description
@@ -584,11 +604,11 @@ export default function SingleTonePage() {
             <Collapse isOpened={isReviewOpen}>
               {isOwner ? (
                 <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
-                  Sorry, you cannot rate your own tone.
+                  Fresh ears only.
                 </div>
               ) : hasUserReviewed ? (
                 <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
-                  You’ve already rated this tone.
+                  You’ve already rated this one.
                 </div>
               ) : (
                 <div className="flex gap-4 bg-[#3a3a3a] p-3 rounded-full items-center mt-12">
@@ -610,13 +630,13 @@ export default function SingleTonePage() {
                   <StarRatings
                     rating={reviewRating}
                     starEmptyColor="#686868"
-                    starRatedColor="white"
+                    starRatedColor="#f5b301"
                     changeRating={setReviewRating}
                     numberOfStars={5}
                     name='rating'
                     starDimension="22px"
                     starSpacing="2px"
-                    starHoverColor="white"
+                    starHoverColor="#f5b301"
                   />
 
                   <button
@@ -646,9 +666,9 @@ export default function SingleTonePage() {
 
                 <div className="flex flex-col gap-2">
                   <StarRatings
-                    rating={review.rating}
+                    rating={review.rating || 0}
                     starEmptyColor="#686868"
-                    starRatedColor="white"
+                    starRatedColor="#f5b301"
                     numberOfStars={5}
                     name="rating"
                     starDimension="20px"
@@ -724,10 +744,10 @@ export default function SingleTonePage() {
                 >
                   Yes, Delete
                 </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
 
         </div>

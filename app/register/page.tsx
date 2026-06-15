@@ -141,13 +141,7 @@ export default function RegisterPage() {
                   <h1 className="text-white text-3xl font-bold uppercase">
                       Register
                   </h1>
-                  <button
-                    className='text-[#42b27c] text-sm mt-1 cursor-pointer flex items-center gap-2'
-                    onClick={goBack}
-                  >
-                      <IoIosSkipBackward size={20}/>
-                      <span className="font-medium ">Go Back</span>
-                  </button>
+
               </div>
           </div>
           <div className="max-w-[1366px] mx-auto mt-10 pb-20">

@@ -3,6 +3,10 @@ declare module "react-collapse" {
 
   export interface CollapseProps {
     isOpened: boolean;
+    theme?: {
+      collapse?: string;
+      content?: string;
+    };
     children?: ReactNode;
   }
 

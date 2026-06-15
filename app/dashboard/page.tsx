@@ -79,7 +79,7 @@ export default function DashboardPage() {
     setPanelSettingsVisible(false);
   }
   const showPanelFavorites = () => {
-    setPanelTitle("Favorite Tones");
+    setPanelTitle("My Favorites");
     setPanelFavoritesVisible(true);
     setPanelEditProfileVisible(false);
     setPanelReviewsVisible(false);
