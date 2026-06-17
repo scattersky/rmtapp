@@ -93,7 +93,7 @@ export default function Header() {
               >
                 <img
                   src={userData?.image || "https://ratemytone.com/wp-content/uploads/2026/04/author_default_avatar.webp"}
-                  className='w-full max-w-[45px] rounded-full transition-transform duration-300 hover:scale-109 border-3 border-gray-600'
+                  className='h-[45px] w-[45px] rounded-full object-cover transition-transform duration-300 hover:scale-109 border-3 border-gray-600'
                 />
                 <div className='bg-red-600 text-white p-0 rounded-full flex justify-center items-center leading-0 absolute top-0 right-0 h-5 w-5 font-bold text-xs'>2</div>
               </Link>

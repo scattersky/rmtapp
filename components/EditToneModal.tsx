@@ -10,25 +10,46 @@ import { db } from "@/lib/firebase";
 
 import { MultiSelect } from "primereact/multiselect";
 import SignalFlowBuilder from "@/components/SignalFlowBuilder";
-import AudioWaveformPreview from "@/components/AudioWaveformPreview";
+
+type EditableTone = {
+  id: string;
+  title?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  genres?: string[];
+  instruments?: string[];
+  signalFlow?: string[];
+  image?: string;
+  music_url?: string;
+  [key: string]: unknown;
+};
+
+type SelectOption = {
+  label: string;
+  value: string;
+};
+
+type MultiSelectValueChange = {
+  value: string[];
+};
 
 type Props = {
-  tone: any;
+  tone: EditableTone;
   onClose: () => void;
   onUpdated: () => void;
 };
 
 export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
-  const [form, setForm] = useState<any>(tone);
-  const [original, setOriginal] = useState<any>(tone);
+  const [form, setForm] = useState<EditableTone>(tone);
+  const [original] = useState<EditableTone>(tone);
 
-  const [genres, setGenres] = useState<any[]>([]);
-  const [instruments, setInstruments] = useState<any[]>([]);
+  const [genres, setGenres] = useState<SelectOption[]>([]);
+  const [instruments, setInstruments] = useState<SelectOption[]>([]);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [musicFile, setMusicFile] = useState<File | null>(null);
 
-  const [imagePreview, setImagePreview] = useState<string | null>(tone.image);
+  const [imagePreview, setImagePreview] = useState<string | null>(tone.image ?? null);
 
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -38,18 +59,24 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
       const g = await getDocs(collection(db, "genres"));
       const i = await getDocs(collection(db, "instruments"));
 
-      setGenres(g.docs.map((d) => ({ label: d.data().name, value: d.data().name })));
-      setInstruments(i.docs.map((d) => ({ label: d.data().name, value: d.data().name })));
+      setGenres(g.docs.map((d) => {
+        const name = String(d.data().name || "");
+        return { label: name, value: name };
+      }));
+      setInstruments(i.docs.map((d) => {
+        const name = String(d.data().name || "");
+        return { label: name, value: name };
+      }));
     };
 
     fetchData();
   }, []);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append("file", file);
 
@@ -58,12 +85,12 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
       body: fd,
     });
 
-    const data = await res.json();
+    const data = await res.json() as { url: string };
     return data.url;
   };
 
   const handleUpdate = async () => {
-    const updates: Record<string, any> = {};
+    const updates: Record<string, unknown> = {};
 
     for (const key in form) {
       if (JSON.stringify(form[key]) !== JSON.stringify(original[key])) {
@@ -118,7 +145,7 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
           </p>
           <input
             name="title"
-            placeholder="Title"
+            value={form.title || ""}
             className="bg-[#424242] p-3 rounded-md w-full"
             onChange={handleChange}
           />
@@ -132,7 +159,7 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
           </p>
           <input
             name="shortDescription"
-            placeholder="Short Description"
+            value={form.shortDescription || ""}
             className="bg-[#424242] p-3 rounded-md w-full"
             onChange={handleChange}
           />
@@ -146,7 +173,7 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
           </p>
           <textarea
             name="longDescription"
-            placeholder="Long Description"
+            value={form.longDescription || ""}
             className="bg-[#424242] p-3 rounded-md w-full"
             rows={4}
             onChange={handleChange}
@@ -162,7 +189,7 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
           <MultiSelect
             value={form.genres}
             options={genres}
-            onChange={(e) => {
+            onChange={(e: MultiSelectValueChange) => {
               if (e.value.length <= 3) {
                 setForm({ ...form, genres: e.value });
               }
@@ -207,7 +234,7 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
           <MultiSelect
             value={form.instruments}
             options={instruments}
-            onChange={(e) => {
+            onChange={(e: MultiSelectValueChange) => {
               if (e.value.length <= 3) {
                 setForm({ ...form, instruments: e.value });
               }
@@ -244,7 +271,7 @@ export default function EditToneModal({ tone, onClose, onUpdated }: Props) {
 
         {/* SIGNAL FLOW */}
         <SignalFlowBuilder
-          value={form.signalFlow}
+          value={form.signalFlow ?? []}
           onChange={(val) => setForm({ ...form, signalFlow: val })}
         />
 

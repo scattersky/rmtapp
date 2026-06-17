@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
 import Link from "next/link";
 import { IoIosSkipBackward } from "react-icons/io";
@@ -24,7 +24,7 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 
 import { Audio } from "react-loader-spinner";
-import { AudioPlayer } from "react-audio-play";
+import {AudioPlayer, type AudioPlayerRef} from "react-audio-play";
 import StarRatings from 'react-star-ratings';
 import { IoSend } from "react-icons/io5";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
@@ -100,6 +100,11 @@ export default function SingleTonePage() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
+  const [playerVolume, setPlayerVolume] = useState(100);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioPlayerRef = useRef<AudioPlayerRef | undefined>(undefined);
+  const audioWrapperRef = useRef<HTMLDivElement | null>(null);
+  const lastVolumeRef = useRef(100);
 
   const [favorites, setFavorites] = useState<string[]>([]);
   const [hasUserReviewed, setHasUserReviewed] = useState(false);
@@ -112,6 +117,72 @@ export default function SingleTonePage() {
   >({});
 
   const router = useRouter();
+  const isVolumeIconActive = isPlaying && playerVolume > 0;
+
+  useEffect(() => {
+    if (!tone?.id) return;
+
+    const handleToneStarted = (event: Event) => {
+      const toneId = (event as CustomEvent<string>).detail;
+
+      if (toneId !== tone.id) {
+        audioPlayerRef.current?.pause();
+        setIsPlaying(false);
+      }
+    };
+
+    window.addEventListener("ratemytone:audio-play", handleToneStarted);
+
+    return () => {
+      window.removeEventListener("ratemytone:audio-play", handleToneStarted);
+    };
+  }, [tone?.id]);
+
+  useEffect(() => {
+    const volumeIconPath = audioWrapperRef.current?.querySelector<SVGPathElement>(
+      ".rap-volume-btn svg path"
+    );
+
+    if (volumeIconPath) {
+      volumeIconPath.style.fill = isVolumeIconActive ? "#42b27c" : "";
+    }
+  }, [isVolumeIconActive]);
+
+  const handleAudioPlay = () => {
+    if (!tone?.id) return;
+
+    window.dispatchEvent(new CustomEvent("ratemytone:audio-play", { detail: tone.id }));
+    setIsPlaying(true);
+  };
+
+  const handleAudioStop = () => {
+    setIsPlaying(false);
+  };
+
+  const handleAudioClickCapture = (event: React.MouseEvent<HTMLDivElement>) => {
+    const target = event.target as Element | null;
+
+    if (!target?.closest(".rap-volume-btn")) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const audio = event.currentTarget.querySelector("audio");
+
+    setPlayerVolume((currentVolume) => {
+      if (currentVolume === 0) {
+        return lastVolumeRef.current;
+      }
+
+      const currentAudioVolume = audio
+        ? Math.round(audio.volume * 100)
+        : currentVolume;
+
+      lastVolumeRef.current = Math.max(5, currentAudioVolume);
+
+      return 0;
+    });
+  };
 
   // 🔥 FETCH TONE + AUTHOR
   useEffect(() => {
@@ -475,12 +546,23 @@ export default function SingleTonePage() {
 
 
               {/* AUDIO */}
-              <div className='rounded-lg overflow-hidden mb-2'>
+              <div
+                ref={audioWrapperRef}
+                className={`tone-card-audio rounded-lg overflow-hidden mb-2 ${
+                  isVolumeIconActive ? "tone-card-audio-playing" : ""
+                }`}
+                onClickCapture={handleAudioClickCapture}
+              >
                 <AudioPlayer
+                  ref={audioPlayerRef}
                   src={tone.music_url || ""}
                   backgroundColor="#272727"
+                  volume={playerVolume}
                   width="100%"
                   sliderColor="#42b27c"
+                  onPlay={handleAudioPlay}
+                  onPause={handleAudioStop}
+                  onEnd={handleAudioStop}
                 />
               </div>
 
@@ -601,55 +683,60 @@ export default function SingleTonePage() {
             </div>
 
             {/* REVIEW FORM */}
-            <Collapse isOpened={isReviewOpen}>
-              {isOwner ? (
-                <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
-                  Fresh ears only.
-                </div>
-              ) : hasUserReviewed ? (
-                <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
-                  You’ve already rated this one.
-                </div>
-              ) : (
-                <div className="flex gap-4 bg-[#3a3a3a] p-3 rounded-full items-center mt-12">
-                  <img
-                    src={userData?.image}
-                    className="h-[40px] w-[40px] rounded-full"
-                    alt="user"
-                  />
+            <Collapse
+              isOpened={isReviewOpen}
+              theme={{
+                collapse: "tone-review-panel",
+                content: "tone-review-panel-content",
+              }}
+            >
+              <div className="pb-4">
+                {isOwner ? (
+                  <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
+                    Fresh ears only.
+                  </div>
+                ) : hasUserReviewed ? (
+                  <div className="bg-[#3a3a3a] p-4 rounded-full text-center text-white mb-4 mt-4">
+                    You’ve already rated this one.
+                  </div>
+                ) : (
+                  <div className="flex gap-4 bg-[#3a3a3a] p-3 rounded-full items-center mt-12">
+                    <img
+                      src={userData?.image}
+                      className="h-[40px] w-[40px] rounded-full"
+                      alt="user"
+                    />
 
-                  <input
-                    type="text"
-                    value={reviewText}
-                    maxLength={220}
-                    onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Leave a review..."
-                    className="flex-1 bg-[#707070] px-3 py-2 rounded-full outline-none"
-                  />
+                    <input
+                      type="text"
+                      value={reviewText}
+                      maxLength={220}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      placeholder="Leave a review..."
+                      className="flex-1 bg-[#707070] px-3 py-2 rounded-full outline-none"
+                    />
 
-                  <StarRatings
-                    rating={reviewRating}
-                    starEmptyColor="#686868"
-                    starRatedColor="#f5b301"
-                    changeRating={setReviewRating}
-                    numberOfStars={5}
-                    name='rating'
-                    starDimension="22px"
-                    starSpacing="2px"
-                    starHoverColor="#f5b301"
-                  />
+                    <StarRatings
+                      rating={reviewRating}
+                      starEmptyColor="#686868"
+                      starRatedColor="#f5b301"
+                      changeRating={setReviewRating}
+                      numberOfStars={5}
+                      name='rating'
+                      starDimension="22px"
+                      starSpacing="2px"
+                      starHoverColor="#f5b301"
+                    />
 
-                  <button
-                    onClick={handleSubmitReview}
-                    className="bg-[#42b27c] px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer"
-                  >
-                    Submit <IoSend />
-                  </button>
-                </div>
-              )}
-
-
-
+                    <button
+                      onClick={handleSubmitReview}
+                      className="bg-[#42b27c] px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer"
+                    >
+                      Submit <IoSend />
+                    </button>
+                  </div>
+                )}
+              </div>
             </Collapse>
 
             {/* REVIEW LIST */}
